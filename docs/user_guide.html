@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Battery Clinic AI — User Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #071225; --panel: #0e1f3b; --panel2: #132a4f; --line: #1f3a66; --text: #e6eefc; --muted: #93a8cb;
+  --blue: #2f7bff; --cyan: #29c5f6; --green: #34d399; --amber: #f5b041; --red: #f0605d;
+  --display: 'Sora', 'Manrope', system-ui, sans-serif; --body: 'Manrope', 'Segoe UI', system-ui, sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--body); font-size: 16px; line-height: 1.65; }
+a { color: var(--cyan); }
+.layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 100vh; }
+
+/* ---------- sidebar */
+aside { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: #061022; border-right: 1px solid var(--line);
+  padding: 1.2rem 1rem 2rem; }
+.brand { display: flex; gap: .6rem; align-items: center; margin-bottom: 1rem; }
+.brand .logo { font-size: 1.8rem; }
+.brand b { font-family: var(--display); font-size: 1.05rem; display: block; }
+.brand span { color: var(--muted); font-size: .8rem; }
+.search { position: relative; }
+.search input { width: 100%; padding: .65rem .8rem .65rem 2.1rem; border-radius: 10px; border: 1px solid var(--line);
+  background: #0a1830; color: var(--text); font: inherit; font-size: .92rem; }
+.search input:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
+.search .icon { position: absolute; left: .7rem; top: .62rem; color: var(--muted); pointer-events: none; }
+.search input:not(:placeholder-shown) + kbd { display: none; }
+.search kbd { position: absolute; right: .6rem; top: .6rem; font-size: .72rem; color: var(--muted); border: 1px solid var(--line);
+  border-radius: 5px; padding: 0 .35rem; }
+.hits-bar { display: none; align-items: center; gap: .4rem; margin: .5rem 0 .2rem; font-size: .82rem; color: var(--muted); }
+.hits-bar.on { display: flex; }
+.hits-bar button { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+  padding: .1rem .5rem; cursor: pointer; font: inherit; }
+.hits-bar button:focus-visible { outline: 2px solid var(--blue); }
+#results { margin: .3rem 0 .8rem; max-height: 40vh; overflow-y: auto; }
+#results a { display: block; padding: .4rem .55rem; border-radius: 8px; text-decoration: none; color: var(--text);
+  font-size: .83rem; border: 1px solid transparent; }
+#results a:hover, #results a:focus { background: var(--panel); border-color: var(--line); outline: none; }
+#results a small { display: block; color: var(--muted); }
+#results .empty { color: var(--muted); font-size: .85rem; padding: .3rem .2rem; }
+nav.toc { margin-top: .6rem; }
+nav.toc .toc-title { color: var(--muted); font-size: .8rem; margin: .8rem 0 .3rem; }
+nav.toc a { display: block; text-decoration: none; color: #c3d2ec; font-size: .88rem; padding: .28rem .55rem; border-radius: 7px;
+  border-left: 2px solid transparent; }
+nav.toc a.sub { padding-left: 1.45rem; font-size: .82rem; color: var(--muted); }
+nav.toc a:hover { background: var(--panel); color: var(--text); }
+nav.toc a.active { border-left-color: var(--cyan); background: #0d2140; color: var(--text); }
+nav.toc a.hidden { display: none; }
+
+/* ---------- main */
+main { padding: 2.2rem clamp(1.2rem, 4vw, 3.5rem) 5rem; max-width: 1180px; }
+.hero { border: 1px solid var(--line); border-radius: 18px; padding: 1.8rem 2rem; margin-bottom: 2.4rem;
+  background: linear-gradient(115deg, #0e1f3b 0%, #0d2447 60%, #0b2f57 100%); }
+.hero h1 { font-family: var(--display); font-size: clamp(1.7rem, 3vw, 2.3rem); margin: 0 0 .4rem; line-height: 1.15; }
+.hero p { color: #c3d2ec; margin: .3rem 0; max-width: 68ch; }
+.meta { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.meta span { background: #0a1830; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .75rem; font-size: .8rem; color: var(--muted); }
+section { padding-top: .6rem; margin-bottom: 2.6rem; scroll-margin-top: 1rem; }
+h2 { font-family: var(--display); font-size: 1.55rem; margin: 0 0 .9rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
+h2 .n { color: var(--cyan); margin-right: .55rem; font-weight: 600; }
+h3 { font-family: var(--display); font-size: 1.15rem; margin: 1.8rem 0 .5rem; scroll-margin-top: 1rem; }
+h3 .n { color: var(--muted); margin-right: .45rem; font-weight: 500; font-size: 1rem; }
+h4 { font-family: var(--display); font-size: 1rem; margin: 1.2rem 0 .4rem; color: #cfe0ff; }
+p, li { max-width: 74ch; }
+ul, ol { padding-left: 1.3rem; }
+li { margin: .25rem 0; }
+code { font-family: var(--mono); font-size: .86em; background: #0a1830; border: 1px solid var(--line); border-radius: 5px; padding: .05rem .35rem; }
+pre { background: #0a1830; border: 1px solid var(--line); border-radius: 10px; padding: .9rem 1rem; overflow-x: auto; font-size: .86rem; line-height: 1.5; }
+pre code { background: none; border: 0; padding: 0; }
+.formula { background: #0a1830; border: 1px solid var(--line); border-left: 3px solid var(--cyan); border-radius: 10px;
+  padding: .75rem 1rem; margin: .8rem 0; font-size: .95rem; max-width: 74ch; }
+.formula b { color: #cfe0ff; }
+.callout { border-radius: 12px; padding: .85rem 1.05rem; margin: 1rem 0; border: 1px solid; max-width: 74ch; }
+.callout p { margin: .2rem 0; }
+.callout.note { background: #0c2142; border-color: #23508f; }
+.callout.warn { background: #2a2210; border-color: #6b5320; }
+.callout.good { background: #0d2a24; border-color: #1d6b50; }
+.callout .t { font-weight: 700; display: block; margin-bottom: .15rem; }
+.table-wrap { overflow-x: auto; margin: .9rem 0; border: 1px solid var(--line); border-radius: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { text-align: left; padding: .55rem .75rem; border-bottom: 1px solid #17315a; vertical-align: top; }
+th { background: var(--panel2); font-weight: 700; color: #cfe0ff; position: sticky; top: 0; }
+tr:last-child td { border-bottom: 0; }
+td code { white-space: nowrap; }
+.attr { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 1rem 1.2rem; margin: 1rem 0; scroll-margin-top: 1rem; }
+.attr h3 { margin-top: .1rem; }
+.attr dl { display: grid; grid-template-columns: 150px 1fr; gap: .3rem 1rem; margin: .4rem 0 0; font-size: .92rem; }
+.attr dt { color: var(--muted); }
+.attr dd { margin: 0; }
+.flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .6rem; margin: 1rem 0; counter-reset: step; }
+.flow div { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: .7rem .8rem; font-size: .85rem; position: relative; }
+.flow div b { display: block; font-family: var(--display); font-size: .92rem; margin-bottom: .2rem; }
+.flow div::before { counter-increment: step; content: counter(step); position: absolute; top: .55rem; right: .7rem; color: var(--cyan);
+  font-family: var(--display); font-weight: 600; font-size: .85rem; }
+.live { background: #0c2142; border: 1px solid #23508f; border-radius: 12px; padding: .9rem 1.1rem; margin: 1rem 0; }
+.live h4 { margin-top: 0; }
+.live-missing { display: none; }
+.az { columns: 3 200px; column-gap: 2rem; font-size: .9rem; }
+.az .letter { font-family: var(--display); color: var(--cyan); font-weight: 600; margin: .6rem 0 .2rem; break-after: avoid; }
+.az a { display: block; text-decoration: none; color: #c3d2ec; padding: .05rem 0; }
+.az a:hover { color: var(--text); text-decoration: underline; }
+mark.hit { background: #f5b04155; color: inherit; border-radius: 3px; padding: 0 1px; }
+mark.hit.current { background: var(--amber); color: #111; }
+.flash { animation: flash 1.2s ease-out; }
+@keyframes flash { from { background: #2f7bff44; } to { background: transparent; } }
+.menu-btn { display: none; }
+.gloss dt { font-weight: 700; margin-top: .8rem; scroll-margin-top: 1rem; }
+.gloss dd { margin: .15rem 0 0 0; color: #c9d6ee; max-width: 74ch; }
+footer { color: var(--muted); font-size: .82rem; border-top: 1px solid var(--line); padding-top: 1rem; margin-top: 3rem; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* compact mode: used inside the app when Mr. GK is open */
+.compact .layout { grid-template-columns: minmax(0, 1fr); }
+.compact aside { position: fixed; z-index: 10; inset: 0 auto 0 0; width: min(340px, 85vw); transform: translateX(-100%); transition: transform .2s; }
+.compact aside.open { transform: none; box-shadow: 0 0 40px #000; }
+.compact .menu-btn { display: inline-block; position: fixed; z-index: 11; top: .7rem; left: .7rem; background: var(--panel2); color: var(--text);
+  border: 1px solid var(--line); border-radius: 10px; padding: .45rem .8rem; font: inherit; cursor: pointer; right: auto; width: auto; }
+.compact main { padding-top: 3.6rem; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  aside { position: fixed; z-index: 10; inset: 0 25% 0 0; transform: translateX(-100%); transition: transform .2s; }
+  aside.open { transform: none; box-shadow: 0 0 40px #000; }
+  .menu-btn { display: inline-block; position: fixed; z-index: 11; top: .7rem; right: .7rem; background: var(--panel2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 10px; padding: .45rem .8rem; font: inherit; cursor: pointer; }
+  .attr dl { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .flash { animation: none; } aside { transition: none; } }
+@media print {
+  :root { --bg: #fff; --text: #111; --muted: #444; --panel: #f5f7fb; --panel2: #eef2f8; --line: #ccd5e3; --cyan: #0b6fa4; }
+  aside, .menu-btn { display: none; }
+.gloss dt { font-weight: 700; margin-top: .8rem; scroll-margin-top: 1rem; }
+.gloss dd { margin: .15rem 0 0 0; color: #c9d6ee; max-width: 74ch; } .layout { display: block; } main { max-width: none; padding: 0; }
+  .hero, .formula, pre, code, .callout, .live, .attr { background: #f5f7fb !important; color: #111; }
+  th { background: #eef2f8; color: #111; } a { color: #0b6fa4; }
+}
+</style>
+</head>
+<body>
+<button class="menu-btn" id="menuBtn" aria-controls="sidebar" aria-expanded="false">☰ Contents &amp; search</button>
+<div class="layout">
+<aside id="sidebar" aria-label="Guide navigation">
+  <div class="brand"><div class="logo" aria-hidden="true">🔋</div><div><b>Battery Clinic AI</b><span>User guide</span></div></div>
+  <div class="search" role="search">
+    <span class="icon" aria-hidden="true">🔍</span>
+    <input id="q" type="search" placeholder="Search the guide" aria-label="Search the guide" autocomplete="off">
+    <kbd aria-hidden="true">/</kbd>
+  </div>
+  <div class="hits-bar" id="hitsBar" aria-live="polite">
+    <span id="hitCount"></span>
+    <button id="prevHit" aria-label="Previous match">↑</button>
+    <button id="nextHit" aria-label="Next match">↓</button>
+    <button id="clearHit" aria-label="Clear search">Clear</button>
+  </div>
+  <div id="results"></div>
+  <nav class="toc" id="toc" aria-label="Table of contents"></nav>
+</aside>
+
+<main id="content">
+<div class="hero">
+  <h1>Battery Clinic AI user guide</h1>
+  <p>An end-to-end explanation of the project: what every attribute means, how the data flows through the pipeline,
+  which calculation drives each decision, and where the limits are.</p>
+  <p>Written for data scientists and students exploring the project for the first time. No prior knowledge of the code is assumed.</p>
+  <div class="meta"><span>Guide version 3.1</span><span>Applies to app version 3.1</span><span>Search: press /</span></div>
+</div>
+
+<!-- ============================================================ 1 -->
+<section id="intro" data-title="How to use this guide">
+<h2><span class="n">1</span>How to use this guide</h2>
+<p>Use the contents on the left to jump to a section, or type in the search box: every match is highlighted and listed,
+and the arrow buttons (or <b>Enter</b> / <b>Shift + Enter</b>) move between matches. Press <b>Esc</b> to clear the search.
+The <a href="#az-index" data-jump="az-index">A–Z index</a> at the end lists every important term.</p>
+<p>Inside the app you can also ask <b>Mr. GK</b>, the built-in assistant, questions in plain language; his answers link
+to the relevant sections of this guide (section <a href="#p-mrgk" data-jump="p-mrgk">9.19</a>).</p>
+<p>If you are new to the project, read sections 2, 5 and 8 first: the overview, how to use the app, and the workflow diagram.
+Sections 6 and 7 describe every attribute. Section 9 walks through the pipeline stage by stage with the exact calculations,
+and section 10 collects all decisions in one table.</p>
+<div class="callout note"><span class="t">Opened from inside the app?</span>
+<p>Section 6.1 then shows live figures from the running app (ranges of your current data file and the current leaderboard).
+When the guide is opened as a standalone file, that box is empty and the About dataset page in the app has the same figures.</p></div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section id="overview" data-title="Project overview">
+<h2><span class="n">2</span>Project overview</h2>
+<h3 id="goal">The question the project answers</h3>
+<p>Given how a laptop has been used (its age, charge cycles, daily hours, workload, power draw and temperature), how healthy is its battery?</p>
+<p><b>Battery health</b> is the battery's current capacity as a percentage of the capacity it was designed to hold when new.
+A new battery is close to 100%; a heavily worn one may be below 40%.</p>
+<div class="formula"><b>Battery Health (%)</b> ≈ Full Charge Capacity ÷ Design Capacity × 100</div>
+<p>That relationship shapes one of the project's most important decisions (section 9.4): if a user already knows the full charge
+capacity, health is almost a simple division, so by default the model is asked to estimate health <i>without</i> it.</p>
+
+<h3 id="what-it-does">What the tool does</h3>
+<ul>
+<li><b>Manages its own data</b>: a CSV can be uploaded in the app and checked before it replaces the current data. Every version is kept and can be restored.</li>
+<li><b>Trains itself</b> from that CSV and compares 9–11 regression models on 5 different shuffles, ranking them by accuracy and consistency.</li>
+<li><b>Lets the user choose</b> the train/test split, whether Full Charge Capacity is used, and which model makes predictions; changes take effect when <b>Apply</b> is pressed.</li>
+<li><b>Predicts</b> battery health for one laptop (typed inputs) or many (a CSV), with a health band, an honest error range, insights, what-if suggestions and downloadable CSV and PDF records.</li>
+<li><b>Explains itself</b> through this guide and through Mr. GK, an assistant that answers questions about the project.</li>
+</ul>
+
+<h3 id="audience">Who it is for</h3>
+<p>End users who want an estimate for their laptop, and data scientists who want to understand or extend the modelling.
+The app hides the modelling details behind sensible defaults; this guide exposes all of them.</p>
+</section>
+
+<!-- ============================================================ 3 -->
+<section id="quickstart" data-title="Quick start">
+<h2><span class="n">3</span>Quick start</h2>
+<h3 id="run-local">Run on your own computer</h3>
+<ol>
+<li>Install Python 3.11 or newer (Anaconda or python.org).</li>
+<li>Create a separate environment so the project's library versions do not clash with other work:
+<pre><code>conda create -n batterysense python=3.11 -y
+conda activate batterysense</code></pre></li>
+<li>In the project folder, install the requirements and start the app:
+<pre><code>pip install -r requirements.txt
+python -m streamlit run app.py</code></pre></li>
+<li>The browser opens at <code>http://localhost:8501</code>. The first start trains all models, which takes around 20–40 seconds;
+after that, results are cached.</li>
+</ol>
+
+<h3 id="replace-data">Replace or update the data</h3>
+<ol>
+<li>Open the <b>Data</b> page (first item in the sidebar) and choose <b>Upload new CSV</b>.</li>
+<li>Choose the file. The app shows a <b>check report</b>: missing columns block the upload; values that are not numbers, rows without
+Battery Health, duplicates and impossible values are listed as warnings. A table compares the new file's medians and ranges with the current data.</li>
+<li>Optionally add a version note, then press <b>Replace</b>. The file is saved as a new version, becomes active, and all models retrain.</li>
+<li>To go back, pick an earlier version under <b>Version history</b> and press <b>Restore</b>.</li>
+</ol>
+<p>Column names must match those in section 6; matching ignores capitals, spaces and punctuation, and extra columns are ignored.
+Replacing <code>data/battery_health.csv</code> by hand also works: the app notices the change and records it as a new version.</p>
+<div class="callout warn"><span class="t">The bundled data file is a stand-in</span>
+<p>The project ships with a synthetic 3,000-row file that has the same 11 columns as the real dataset, so the app can be tested.
+Replace it with the real data before drawing any conclusions.</p></div>
+
+<h3 id="deploy">Deploy online (free tier)</h3>
+<ol>
+<li>Put the project folder in a GitHub repository (code, <code>data/</code>, <code>docs/</code>, <code>.streamlit/</code>).</li>
+<li>Sign in at <code>share.streamlit.io</code>, choose <b>New app</b>, and select the repository and <code>app.py</code>.</li>
+<li>The service installs <code>requirements.txt</code> and gives the app a public link.</li>
+</ol>
+<p>Free hosting puts the app to sleep after a period without visitors; the next visit wakes it (and retrains, taking about half a minute).
+This is normal free-tier behaviour. No API keys or external services are used: all modelling runs inside the app.</p>
+</section>
+
+<!-- ============================================================ 4 -->
+<section id="structure" data-title="Project structure">
+<h2><span class="n">4</span>Project structure</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>File / folder</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>app.py</code></td><td>The Streamlit interface: pages, inputs, charts, the gauge and the insights panel. Contains no modelling logic.</td></tr>
+<tr><td><code>engine.py</code></td><td>All modelling: loading and cleaning, calculated attributes, attribute selection, the 5-shuffle stability run,
+final model fitting, prediction and insights. Can be imported and tested without the interface.</td></tr>
+<tr><td><code>config.py</code></td><td>Domain settings in one place: column names, units, descriptions, health bands, calculated attributes, split options,
+shuffle seeds, thresholds and advice text. Most adaptations only need this file.</td></tr>
+<tr><td><code>data/battery_health.csv</code></td><td>The training data (section 6).</td></tr>
+<tr><td><code>docs/user_guide.html</code></td><td>This guide. Opened by the 📘 button in the app, or directly in a browser.</td></tr>
+<tr><td><code>assets/hero.jpg</code></td><td>Optional banner image. If absent, a built-in illustration is shown.</td></tr>
+<tr><td><code>.streamlit/config.toml</code></td><td>Theme colours and server settings.</td></tr>
+<tr><td><code>requirements.txt</code></td><td>Python libraries and their version ranges.</td></tr>
+<tr><td><code>versions.py</code></td><td>Data versions: saving uploads, restoring, the version log, and optional GitHub commits.</td></tr>
+<tr><td><code>report.py</code></td><td>Downloadable prediction records: one-row CSV and one-page PDF report.</td></tr>
+<tr><td><code>mrgk.py</code></td><td>Mr. GK: guide search, answers from the AI service, citations and the daily limit.</td></tr>
+<tr><td><code>mrgk_kb.py</code></td><td>Mr. GK's knowledge base: in-depth answers on about 30 topics, filled with live numbers.</td></tr>
+<tr><td><code>data/versions/</code></td><td>Every data version ever used, plus <code>versions.json</code>, the log.</td></tr>
+<tr><td><code>assets/mrgk.png</code></td><td>Mr. GK's profile picture.</td></tr>
+<tr><td><code>.streamlit/secrets.toml</code></td><td>Optional private settings: the AI key for Mr. GK and GitHub details for storing versions. Never commit this file.</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section id="using" data-title="Using the app">
+<h2><span class="n">5</span>Using the app</h2>
+<h3 id="sidebar-settings">Sidebar: the process in order</h3>
+<p>The menu (logo and label buttons; the highlighted one is the current page) follows the order of the work: <b>Data → About dataset → EDA &amp; insights → Model performance → Predict → Batch prediction</b>.
+Three controls sit at the top right of every page: the <b>theme</b> circle (sun or moon), the <b>user guide</b> circle (book)
+and the <b>Mr. GK</b> button.</p>
+<p>On <b>Predict</b>, <b>Batch prediction</b> and <b>Model performance</b>, the sidebar also shows <b>Model setup</b>:</p>
+<ul>
+<li><b>Include Full Charge Capacity</b> — off by default (why: section 9.4).</li>
+<li><b>Train / test split</b> — 70/30, 75/25, 80/20 (default) or 85/15 (section 9.7).</li>
+<li><b>Model</b> — the model used for predictions; ⭐ marks the recommended one.</li>
+<li><b>Apply</b> — nothing changes until this is pressed. A green confirmation message then says what changed.
+Setup changes retrain all models (about 20–40 seconds) and select the recommended model for the new setup.</li>
+</ul>
+<p>The <b>Active model</b> card below always shows which model, split and setting are in use, and the active data version.</p>
+<p>The <b>theme</b> circle at the top right (sun in dark mode, moon in light mode) switches the colour theme of the whole app, its charts and this guide.</p>
+
+<h3 id="page-data">Data</h3>
+<p>Two options: <b>Use existing CSV</b> shows the active version and its first rows; <b>Upload new CSV</b> opens the upload, check report and
+<b>Replace</b> button (section 3). <b>Version history</b> lists every version with its date, rows and note, and <b>Restore</b> brings back any earlier one.</p>
+
+<h3 id="page-about">About dataset</h3>
+<p><b>Download dataset</b> saves the exact file the current models are trained on: the original data file, or the uploaded version
+that is active, unchanged as it was provided. Then: the active data version, what was removed during cleaning, the attribute dictionary with live minimum, median, maximum and missing counts,
+and the calculated attributes.</p>
+
+<h3 id="page-eda">EDA &amp; insights</h3>
+<p>A full exploratory analysis of <b>all 16 variables</b> — the 10 inputs, the 5 calculated attributes and the target — including
+those the model does not use, so every modelling decision can be justified with evidence. <b>Download EDA report (HTML)</b> saves it all
+as one file. Seven tabs:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Tab</th><th>What it shows</th></tr></thead><tbody>
+<tr><td>Overview</td><td>Rows, variables, missing values, rows removed; each variable's role, type, unit and meaning; summary statistics; first rows.</td></tr>
+<tr><td>Univariate</td><td>Mean, median, standard deviation, <b>skewness and kurtosis with plain-language readings</b> for every variable; a detailed
+histogram and box plot for any variable; all 16 distributions side by side.</td></tr>
+<tr><td>Bivariate</td><td>Each variable's correlation with battery health (sorted, with strength bands and a "What this tells you" panel);
+scatter or Yes/No box plot for any variable with Pearson r and Spearman ρ; average health across each variable's range, for all variables.</td></tr>
+<tr><td>Multivariate</td><td>Correlation matrix (optionally with calculated attributes); pairs of inputs that move together; multicollinearity (VIF)
+for the model's inputs; a scatter matrix of the strongest variables coloured by health band.</td></tr>
+<tr><td>Outliers</td><td>IQR and z-score counts for every numeric variable, box plots for all, and why outliers are kept.</td></tr>
+<tr><td>Target</td><td>Battery health distribution with band boundaries, laptops per band, skewness, kurtosis and percentiles.</td></tr>
+<tr><td>Variable selection</td><td>For every variable: used in the model or not, and the evidence — correlation, VIF, outliers, model importance and
+the selection test — plus the leakage chart for Full Charge Capacity and the selection-test chart for calculated attributes.</td></tr>
+</tbody></table></div>
+
+<h3 id="page-models">Model performance</h3>
+<p>The leaderboard of all models over 5 shuffles; a selection card with the models and an <b>Apply</b> button (the same choice as the sidebar);
+a summary of the selected model compared with the active one; a full-width chart of each model's score on every shuffle; and validation charts
+for the active model; <b>band accuracy</b> with a confusion matrix and precision, recall and F1 per health band (section 9.21);
+and which calculated attributes were kept.</p>
+
+<h3 id="page-predict">Predict</h3>
+<p>The input boxes are on the left and the result on the right. Type values into the input boxes; each shows the range found in the data and the median. Press <b>Predict battery health</b>;
+<b>Reset</b> restores typical values. The result shows the gauge and band, the likely range, and the model's performance.</p>
+<p>After a prediction, two downloads appear: <b>Prediction details (CSV)</b>, one row with every input, the prediction, its range, the model,
+split, data version and each input's effect; and a one-page <b>Report (PDF)</b> to share.</p>
+<p>Below, the <b>Insights</b> explain the estimate: a conclusion with advice, what-if suggestions, a step-by-step chart from a typical laptop
+to yours, and your inputs grouped as Concerns, In your favour and Normal (section 9.15).</p>
+
+<h3 id="page-batch">Batch prediction</h3>
+<p>Predicts many laptops at once. Download the template, fill one row per laptop, upload it, then download the results. Each row gets a
+predicted health, a band and notes on blank or out-of-range values. If the file also contains Battery Health, the page reports the average error.</p>
+
+<h3 id="page-guide">User guide and Mr. GK</h3>
+<p>The <b>book</b> circle at the top right opens this guide across the full width of the page; choose any page in the sidebar to return.</p>
+<p>The <b>Mr. GK</b> button opens the assistant as a <b>floating window</b> on the right, over whichever page you are on, so you can ask
+questions while looking at a chart or a prediction. He stays open as you move between pages. The window shows a short welcome; the six
+suggested questions are inside <b>FAQ</b>. Clicking a 📖 section button under an answer opens the guide at that section. The circled
+<b>✕</b> at the top right of the window closes him; the Mr. GK button toggles him too.</p>
+<p>Mr. GK answers in depth: a short summary, how it works, the calculation, live numbers from your app and what it means for you
+(section 9.19). Six suggestion chips help you start.</p>
+</section>
+
+<!-- ============================================================ 6 -->
+<section id="data" data-title="The dataset and its attributes">
+<h2><span class="n">6</span>The dataset and its attributes</h2>
+<p>Each row describes one laptop. There are ten input attributes and one target. Nine inputs are always used; <b>Full Charge Capacity</b> is optional.
+The data-collecting agency is not known, which matters for how far the results can be generalised (section 11).</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Attribute</th><th>Unit</th><th>Type</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><a href="#attr-age" data-jump="attr-age">Battery Age</a></td><td>years</td><td>Number (whole)</td><td>Input</td></tr>
+<tr><td><a href="#attr-hours" data-jump="attr-hours">Daily Usage Hours</a></td><td>hours/day</td><td>Number</td><td>Input</td></tr>
+<tr><td><a href="#attr-gaming" data-jump="attr-gaming">Gaming User</a></td><td>1 = yes, 0 = no</td><td>Yes/No</td><td>Input</td></tr>
+<tr><td><a href="#attr-design" data-jump="attr-design">Design Capacity</a></td><td>mAh (see note)</td><td>Number</td><td>Input</td></tr>
+<tr><td><a href="#attr-cycles" data-jump="attr-cycles">Cycle Count</a></td><td>cycles</td><td>Number (whole)</td><td>Input</td></tr>
+<tr><td><a href="#attr-cpu" data-jump="attr-cpu">CPU Usage</a></td><td>%</td><td>Number, 0–100</td><td>Input</td></tr>
+<tr><td><a href="#attr-gpu" data-jump="attr-gpu">GPU Usage</a></td><td>%</td><td>Number, 0–100</td><td>Input</td></tr>
+<tr><td><a href="#attr-power" data-jump="attr-power">Power Consumption</a></td><td>W</td><td>Number</td><td>Input</td></tr>
+<tr><td><a href="#attr-temp" data-jump="attr-temp">Average Temperature</a></td><td>°C</td><td>Number</td><td>Input</td></tr>
+<tr><td><a href="#attr-fcc" data-jump="attr-fcc">Full Charge Capacity</a></td><td>mAh (see note)</td><td>Number</td><td>Optional input, off by default</td></tr>
+<tr><td><a href="#attr-health" data-jump="attr-health">Battery Health</a></td><td>%</td><td>Number, 0–100</td><td>Target (predicted)</td></tr>
+</tbody></table></div>
+
+<div class="callout warn" id="unit-note"><span class="t">A note on capacity units</span>
+<p>The capacity values in the data are around 40,000–80,000. As milliamp-hours (mAh) that would be roughly ten times a typical laptop battery;
+as milliwatt-hours (mWh, about 40–80 Wh) it matches typical laptops. The app labels them mAh as in the original design; confirm the unit with the data source
+and change it in <code>config.py</code> if needed. The unit label does not affect any calculation.</p></div>
+
+<h3 id="live"><span class="n">6.1</span>Live figures from your data</h3>
+<!--LIVE_DATA-->
+<p class="live-note">Shown only when this guide is opened from inside the app. Otherwise see the <b>About dataset</b> page.</p>
+
+<h3 id="attributes"><span class="n">6.2</span>Attribute reference</h3>
+
+<div class="attr" id="attr-age"><h3>Battery Age</h3>
+<dl>
+<dt>Meaning</dt><dd>How long the battery has been in use, in years.</dd>
+<dt>Type and role</dt><dd>Whole number; input; treated as a <b>number</b>, not a category (section 9.3).</dd>
+<dt>Why it may matter</dt><dd>Lithium-ion cells lose capacity with time (calendar ageing) even when little used.</dd>
+<dt>Expected relationship</dt><dd>Older → lower health.</dd>
+<dt>Used in</dt><dd>Model input; calculated attribute <a href="#eng-cpy" data-jump="eng-cpy">Cycles per Year</a>.</dd>
+<dt>Caveats</dt><dd>An age of 0 makes Cycles per Year undefined; that value is left blank and filled with the median (section 9.6).</dd>
+</dl></div>
+
+<div class="attr" id="attr-hours"><h3>Daily Usage Hours</h3>
+<dl>
+<dt>Meaning</dt><dd>Average number of hours per day the laptop is used.</dd>
+<dt>Type and role</dt><dd>Number; input.</dd>
+<dt>Why it may matter</dt><dd>More use generally means more cycles and more time at elevated temperature.</dd>
+<dt>Expected relationship</dt><dd>More hours → lower health, mostly through Cycle Count and temperature.</dd>
+<dt>Used in</dt><dd>Model input; calculated attributes <a href="#eng-heat" data-jump="eng-heat">Heat Stress</a> and <a href="#eng-pph" data-jump="eng-pph">Power per Usage Hour</a>.</dd>
+<dt>Caveats</dt><dd>The data does not say whether these hours are on battery or on mains power, which matters a lot for wear.</dd>
+</dl></div>
+
+<div class="attr" id="attr-gaming"><h3>Gaming User</h3>
+<dl>
+<dt>Meaning</dt><dd>Whether the laptop is regularly used for gaming. Stored as 1 (yes) or 0 (no); the app shows a Yes/No choice.</dd>
+<dt>Type and role</dt><dd>Yes/No; input. Batch files may use 1/0 or Yes/No.</dd>
+<dt>Why it may matter</dt><dd>Gaming creates sustained high power draw and heat.</dd>
+<dt>Expected relationship</dt><dd>Gamers → somewhat lower health.</dd>
+<dt>Used in</dt><dd>Model input; calculated attribute <a href="#eng-gl" data-jump="eng-gl">Gaming Load</a>.</dd>
+<dt>Caveats</dt><dd>Self-reported and coarse: it does not say how much or how often.</dd>
+</dl></div>
+
+<div class="attr" id="attr-design"><h3>Design Capacity</h3>
+<dl>
+<dt>Meaning</dt><dd>The capacity the battery was designed to hold when new, from the manufacturer's specification.</dd>
+<dt>Type and role</dt><dd>Number; input.</dd>
+<dt>Why it may matter</dt><dd>On its own it says little about wear; it provides scale for Full Charge Capacity.</dd>
+<dt>Expected relationship</dt><dd>Little direct effect when Full Charge Capacity is excluded.</dd>
+<dt>Used in</dt><dd>Model input; the denominator of the health ratio.</dd>
+<dt>Caveats</dt><dd>Unit uncertain (see the <a href="#unit-note" data-jump="unit-note">unit note</a>). When Full Charge Capacity is included,
+these two are analysed as a pair in the insights (section 9.15).</dd>
+</dl></div>
+
+<div class="attr" id="attr-cycles"><h3>Cycle Count</h3>
+<dl>
+<dt>Meaning</dt><dd>Number of full charge–discharge cycles completed. Two half discharges count as roughly one cycle.</dd>
+<dt>Type and role</dt><dd>Whole number; input.</dd>
+<dt>Why it may matter</dt><dd>Each cycle causes a small amount of permanent wear; this is the most direct usage-based wear signal.</dd>
+<dt>Expected relationship</dt><dd>More cycles → lower health. Typically the strongest input when Full Charge Capacity is excluded.</dd>
+<dt>Used in</dt><dd>Model input; calculated attribute <a href="#eng-cpy" data-jump="eng-cpy">Cycles per Year</a>.</dd>
+<dt>Caveats</dt><dd>Strongly linked to Battery Age, since older batteries have had more time to cycle.</dd>
+</dl></div>
+
+<div class="attr" id="attr-cpu"><h3>CPU Usage</h3>
+<dl>
+<dt>Meaning</dt><dd>Average processor utilisation, as a percentage.</dd>
+<dt>Type and role</dt><dd>Number between 0 and 100; input. Values above 100 are rejected.</dd>
+<dt>Why it may matter</dt><dd>Higher load means more power draw and heat.</dd>
+<dt>Expected relationship</dt><dd>Mild; mostly indirect through temperature and power.</dd>
+<dt>Used in</dt><dd>Model input; calculated attribute <a href="#eng-wi" data-jump="eng-wi">Workload Intensity</a>.</dd>
+<dt>Caveats</dt><dd>An average hides peaks, and the measurement period is unknown.</dd>
+</dl></div>
+
+<div class="attr" id="attr-gpu"><h3>GPU Usage</h3>
+<dl>
+<dt>Meaning</dt><dd>Average graphics processor utilisation, as a percentage.</dd>
+<dt>Type and role</dt><dd>Number between 0 and 100; input.</dd>
+<dt>Why it may matter</dt><dd>The GPU is among the most power-hungry components.</dd>
+<dt>Expected relationship</dt><dd>Mild; higher among gamers.</dd>
+<dt>Used in</dt><dd>Model input; calculated attributes <a href="#eng-wi" data-jump="eng-wi">Workload Intensity</a> and <a href="#eng-gl" data-jump="eng-gl">Gaming Load</a>.</dd>
+<dt>Caveats</dt><dd>Laptops without a separate graphics card may report integrated-graphics usage, which is not comparable.</dd>
+</dl></div>
+
+<div class="attr" id="attr-power"><h3>Power Consumption</h3>
+<dl>
+<dt>Meaning</dt><dd>Average power drawn by the laptop, in watts.</dd>
+<dt>Type and role</dt><dd>Number; input.</dd>
+<dt>Why it may matter</dt><dd>Higher discharge rates stress the cells.</dd>
+<dt>Expected relationship</dt><dd>Mild; correlated with CPU and GPU usage.</dd>
+<dt>Used in</dt><dd>Model input; calculated attribute <a href="#eng-pph" data-jump="eng-pph">Power per Usage Hour</a>.</dd>
+<dt>Caveats</dt><dd>Partly redundant with CPU and GPU usage, so its individual importance can look smaller than its real effect.</dd>
+</dl></div>
+
+<div class="attr" id="attr-temp"><h3>Average Temperature</h3>
+<dl>
+<dt>Meaning</dt><dd>Average operating temperature of the device or battery, in °C.</dd>
+<dt>Type and role</dt><dd>Number; input.</dd>
+<dt>Why it may matter</dt><dd>Heat speeds up the chemical reactions that degrade battery cells.</dd>
+<dt>Expected relationship</dt><dd>Hotter → lower health.</dd>
+<dt>Used in</dt><dd>Model input; calculated attribute <a href="#eng-heat" data-jump="eng-heat">Heat Stress</a>.</dd>
+<dt>Caveats</dt><dd>Whether this is battery, processor or case temperature is not documented.</dd>
+</dl></div>
+
+<div class="attr" id="attr-fcc"><h3>Full Charge Capacity</h3>
+<dl>
+<dt>Meaning</dt><dd>The charge the battery can actually hold today when fully charged.</dd>
+<dt>Type and role</dt><dd>Number; <b>optional</b> input, switched off by default.</dd>
+<dt>Why it matters</dt><dd>It is a measurement of wear rather than a cause: Battery Health is essentially this value divided by Design Capacity.</dd>
+<dt>Expected relationship</dt><dd>Almost deterministic together with Design Capacity (section 9.4).</dd>
+<dt>Used in</dt><dd>Model input only when switched on. When on, its value is also shown as a card beside the prediction.</dd>
+<dt>Caveats</dt><dd>Including it makes scores look excellent but explains little about why batteries wear.</dd>
+</dl></div>
+
+<div class="attr" id="attr-health"><h3>Battery Health (target)</h3>
+<dl>
+<dt>Meaning</dt><dd>Current capacity as a percentage of design capacity.</dd>
+<dt>Type and role</dt><dd>Number between 0 and 100; the value the model predicts.</dd>
+<dt>Bands</dt><dd>Good ≥ 70%, Moderate 40–70%, Poor below 40%. Set in <code>config.py</code> (<code>HEALTH_BANDS</code>); they are domain rules,
+not something the model learns.</dd>
+<dt>Cleaning</dt><dd>Rows without a Battery Health value are removed before training.</dd>
+<dt>Output handling</dt><dd>Predictions are clipped to 0–100, since health outside that range is impossible.</dd>
+</dl></div>
+</section>
+
+<!-- ============================================================ 7 -->
+<section id="engineered" data-title="Calculated attributes">
+<h2><span class="n">7</span>Calculated attributes</h2>
+<p>Five extra attributes are calculated from the inputs. Users never type them; they are computed automatically. Each is a hypothesis
+about battery wear, so each must <b>earn its place</b>: it is added to the model only if it measurably improves accuracy (section 9.5).
+Whether or not they are used by the model, all five appear in the <b>How your laptop compares</b> panel, marked ƒ.</p>
+
+<div class="attr" id="eng-cpy"><h3>Cycles per Year</h3>
+<div class="formula"><b>Cycles per Year</b> = Cycle Count ÷ Battery Age</div>
+<p>Separates heavy from light use independent of age: a 2-year-old battery with 1,200 cycles (600/year) has been used far harder than an
+8-year-old one with the same count (150/year). Undefined when Battery Age is 0; then left blank and filled with the median.</p></div>
+
+<div class="attr" id="eng-heat"><h3>Heat Stress</h3>
+<div class="formula"><b>Heat Stress</b> (°C·h/day) = Average Temperature × Daily Usage Hours</div>
+<p>Heat damages batteries, and long use at high temperature compounds it. This combines both into a daily exposure figure.</p></div>
+
+<div class="attr" id="eng-wi"><h3>Workload Intensity</h3>
+<div class="formula"><b>Workload Intensity</b> (%) = (CPU Usage + GPU Usage) ÷ 2</div>
+<p>One combined measure of how hard the laptop works.</p></div>
+
+<div class="attr" id="eng-pph"><h3>Power per Usage Hour</h3>
+<div class="formula"><b>Power per Usage Hour</b> = Power Consumption ÷ Daily Usage Hours</div>
+<p>Distinguishes high-power use from simply long use. Undefined when Daily Usage Hours is 0; then filled with the median.</p></div>
+
+<div class="attr" id="eng-gl"><h3>Gaming Load</h3>
+<div class="formula"><b>Gaming Load</b> (%) = Gaming User × GPU Usage</div>
+<p>Equals GPU Usage for gamers and 0 for everyone else, isolating sustained GPU load that comes specifically from gaming.</p></div>
+
+<div class="callout warn" id="no-ratio"><span class="t">Deliberately not included: the capacity ratio</span>
+<p>Full Charge Capacity ÷ Design Capacity × 100 is not offered as a calculated attribute. It is essentially the target itself, so
+including it would make the model look excellent while learning nothing. This is a form of <b>target leakage</b>.</p></div>
+
+<h3 id="future-attributes">Attributes worth collecting in future</h3>
+<p>These are known drivers of battery wear but are not in the current data, so they cannot be used: charging habits (time at 100%,
+fast charging, deep discharges to near 0%), ambient temperature or climate, laptop brand/model and battery chemistry, screen brightness,
+and the share of time on battery versus mains power. Charging habits in particular are considered among the strongest factors.</p>
+</section>
+
+<!-- ============================================================ 8 -->
+<section id="workflow" data-title="End-to-end workflow">
+<h2><span class="n">8</span>End-to-end workflow</h2>
+<p>From the CSV file to a prediction, the data passes through these stages in order. Stages 1–8 run when the app starts, or when the data,
+the Full Charge Capacity setting or the split changes; stages 9–11 run for each prediction.</p>
+<div class="flow">
+<div><b>Load</b>Read CSV, detect separator, match column names</div>
+<div><b>Clean</b>Convert to numbers, drop rows without target, remove duplicates</div>
+<div><b>Configure</b>Apply Full Charge Capacity setting and chosen split</div>
+<div><b>Calculate</b>Add the five calculated attributes</div>
+<div><b>Select</b>Keep calculated attributes that improve CV R²</div>
+<div><b>Stability run</b>Every model × 5 shuffles: train, test, score</div>
+<div><b>Rank</b>Stability score = mean R² − spread; recommend the top model</div>
+<div><b>Final fit</b>Refit the chosen model on all rows</div>
+<div><b>Validate input</b>Parse, reject impossible values, warn outside range</div>
+<div><b>Predict</b>Health %, band, likely range</div>
+<div><b>Explain</b>Percentiles, drivers, conclusion, advice</div>
+</div>
+<p>Inside the model, every prediction also passes through the same preprocessing learned during training: missing values filled with the
+training median, then standard scaling (section 9.6).</p>
+</section>
+
+<!-- ============================================================ 9 -->
+<section id="pipeline" data-title="The pipeline, stage by stage">
+<h2><span class="n">9</span>The pipeline, stage by stage</h2>
+<p>This section explains each stage: what happens, why, and the exact calculation or rule behind every decision. Function names refer to <code>engine.py</code>.</p>
+
+<h3 id="p-load"><span class="n">9.1</span>Loading and validation</h3>
+<p><b>Function:</b> <code>load_data</code>, <code>read_csv_any</code>, <code>align_columns</code></p>
+<ul>
+<li><b>Encoding</b>: tries UTF-8 (with or without byte-order mark), then Latin-1.</li>
+<li><b>Separator</b>: detected automatically among comma, semicolon, tab and pipe.</li>
+<li><b>Column matching</b>: names are compared after lower-casing and removing everything except letters and digits, so
+<code>Cycle_Count</code>, <code>cycle count</code> and <code>CycleCount</code> all match <b>Cycle Count</b>.</li>
+<li><b>Required columns</b>: the nine always-used inputs plus Battery Health. If any is missing the app stops with a message listing what was found.
+Full Charge Capacity is optional; without it the sidebar switch is disabled.</li>
+<li><b>Extra columns</b> are ignored and listed on the About dataset page.</li>
+</ul>
+<p><b>Change detection</b>: the app keeps an internal checksum of the data file (never shown). When the file changes, through Replace, Restore or by hand, all cached results are discarded and the models retrain automatically.</p>
+
+<h3 id="p-clean"><span class="n">9.2</span>Cleaning</h3>
+<ul>
+<li><b>Numeric conversion</b>: text such as <code>1,234</code> or <code>45%</code> becomes a number; <code>Yes/No</code>, <code>True/False</code>
+and <code>Y/N</code> become 1/0. Anything unparseable becomes blank (missing).</li>
+<li><b>Rows without Battery Health</b> are removed, since there is nothing to learn from them.</li>
+<li><b>Exact duplicate rows</b> are removed, so a repeated laptop cannot appear in both the training and the test part and inflate the score.</li>
+<li><b>Missing input values</b> are kept and filled inside the model (section 9.6).</li>
+<li><b>Outliers</b> are kept. Extreme but genuine laptops are valid data; tree models are robust to them and scaling limits their influence on linear models.</li>
+</ul>
+
+<h3 id="p-types"><span class="n">9.3</span>Data types: why Battery Age is a number</h3>
+<p>An earlier, generic version of the pipeline treated any whole-number column with 10 or fewer distinct values as a <b>category</b>, a rule meant for
+coded columns such as a region numbered 1–3. Battery Age (1–10 years) was caught by that rule.</p>
+<p>For Battery Age this is wrong, because age is a real quantity: 6 years is more than 5, and each extra year means the same thing. As a category the model would:</p>
+<ul>
+<li>lose the ordering, and learn each age as an unrelated label with fewer examples per age;</li>
+<li>be unable to reason about an age it has not seen (for example 11 years);</li>
+<li>force a dropdown instead of a free-text box in the interface.</li>
+</ul>
+<p><b>Decision:</b> in this project every input except Gaming User is explicitly a number (<code>kind: "numeric"</code> in <code>config.py</code>),
+and Gaming User is a Yes/No value stored as 1/0. For a yes/no attribute, treating it as a number or a category gives the same result.</p>
+
+<h3 id="p-fcc"><span class="n">9.4</span>The Full Charge Capacity decision</h3>
+<p>Battery Health is almost exactly Full Charge Capacity divided by Design Capacity. Example from a real row:</p>
+<div class="formula">44,961.9 ÷ 57,884 × 100 = <b>77.7%</b> &nbsp;versus recorded Battery Health <b>76.9%</b></div>
+<p>The EDA page quantifies this on the current data: the correlation between the ratio and Battery Health, and the median difference between them.
+When both capacities are inputs, the model mostly learns this ratio. The score looks excellent, but it answers a question the user has already answered by
+knowing the full charge capacity, and it says little about <i>why</i> the battery wore.</p>
+<p><b>Decision:</b> Full Charge Capacity is <b>off by default</b>, so the model estimates health from usage patterns. The switch in the sidebar lets a
+user include it, for example when the laptop reports it, and all models retrain. The switch is the first setting in the sidebar because it changes
+everything downstream.</p>
+
+<h3 id="p-select"><span class="n">9.5</span>Calculated attributes: selection</h3>
+<p><b>Function:</b> <code>select_engineered</code></p>
+<p>Each calculated attribute from section 7 is tested individually:</p>
+<ol>
+<li>Take the <b>training part of shuffle 1 only</b> (seed 11). Test rows never influence which attributes are kept, which avoids leaking test information into the design.</li>
+<li>Score the model with only the original inputs using 5-fold cross-validation. The reference model is Hist Gradient Boosting: strong, fast, and able to find interactions.</li>
+<li>Add one calculated attribute and score again.</li>
+<li>Keep it only if the gain reaches the threshold:</li>
+</ol>
+<div class="formula"><b>Gain</b> = mean CV R² with the attribute − mean CV R² without &nbsp;&nbsp;→&nbsp; keep if Gain ≥ <b>0.002</b></div>
+<p>If several attributes pass, they are scored together; if the combination is worse than the best single one, only that best one is kept.</p>
+<p><b>Why a threshold</b>: cross-validation scores vary by small amounts from random noise. Without a minimum gain, attributes would be kept for
+improvements that are not real, making the model more complex for no benefit. 0.002 R² is small but above typical fold-to-fold noise on this data size.</p>
+<p><b>Typical outcome</b>: tree models can often find these combinations by themselves, so few or none may be kept. That is a legitimate result, reported
+on the Model performance page. The attributes are still used for comparisons in the insights panel.</p>
+
+<h3 id="p-prep"><span class="n">9.6</span>Preprocessing inside the model</h3>
+<p><b>Function:</b> <code>make_pipeline</code>. Every model is wrapped in the same three-step pipeline, learned from the training rows only:</p>
+<ol>
+<li><b>Median imputation</b>: blanks are filled with the training median of that column. The median is used rather than the mean because it is not pulled by extreme values.</li>
+<li><b>Standard scaling</b>: each column is rescaled:
+<div class="formula"><b>z</b> = (x − mean) ÷ standard deviation &nbsp;(mean and standard deviation from the training rows)</div>
+Scaling matters for models that compare distances or penalise coefficient size (K-Nearest Neighbors, Support Vector Regression, Ridge). Without it,
+Design Capacity (tens of thousands) would dominate Gaming User (0 or 1). Tree models are unaffected by scaling, so it does no harm there.</li>
+<li><b>The model</b> itself.</li>
+</ol>
+<p>Because preprocessing lives inside the pipeline, it is re-learned on each training part, so the test rows never influence the medians or scaling.
+This prevents a subtle form of data leakage.</p>
+
+<h3 id="p-split"><span class="n">9.7</span>Train/test split</h3>
+<p>The data is divided into a training part (the model learns from it) and a test part (hidden, used only to measure accuracy on unseen laptops).
+The user can choose between four ratios:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Option</th><th>Training share</th><th>Test share</th><th>Trade-off</th></tr></thead>
+<tbody>
+<tr><td>70 / 30</td><td>70%</td><td>30%</td><td>Largest test set: most reliable score, slightly less data to learn from</td></tr>
+<tr><td>75 / 25</td><td>75%</td><td>25%</td><td>Balanced</td></tr>
+<tr><td>80 / 20</td><td>80%</td><td>20%</td><td>Default; common practice</td></tr>
+<tr><td>85 / 15</td><td>85%</td><td>15%</td><td>Most training data; test score noisier because fewer rows are tested</td></tr>
+</tbody></table></div>
+<div class="callout note"><span class="t">What changing the ratio really changes</span>
+<p>Mostly how the model is <i>tested</i>, not how good it is. Scores move a little between ratios partly by chance.
+That is why every ratio is evaluated over 5 shuffles (next section), which makes the comparison far more stable than a single split.</p></div>
+
+<h3 id="p-stability"><span class="n">9.8</span>Stability check: 5 internal shuffles</h3>
+<p><b>Function:</b> <code>stability_run</code></p>
+<p>A single random split can be lucky or unlucky. Instead of one split, the app repeats the split 5 times with different shuffles, using fixed
+random states <code>11, 23, 42, 57, 89</code> (fixed so results are reproducible). For each shuffle, every model is trained on the training part and scored on the test part.
+The five scores per model are then summarised:</p>
+<div class="formula">
+<b>Mean R²</b> = (R²₁ + R²₂ + R²₃ + R²₄ + R²₅) ÷ 5<br>
+<b>Spread</b> = standard deviation of the five R² values<br>
+<b>Worst / Best R²</b> = lowest / highest of the five
+</div>
+<p>MAE, RMSE and MAPE are averaged in the same way.</p>
+<div class="callout warn"><span class="t">Why the user never picks the random state</span>
+<p>If users could change the random state freely, they could keep trying until the score is high and then believe it. The model would not be better;
+the shuffle would just be lucky. This is a form of cheating the test, even when unintentional. Averaging over fixed shuffles removes that temptation
+and shows how much the score genuinely varies.</p></div>
+
+<h3 id="p-models"><span class="n">9.9</span>Candidate models</h3>
+<p><b>Function:</b> <code>make_models</code>. All are regression models from scikit-learn, plus XGBoost and LightGBM when those libraries are installed.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Model</th><th>Settings</th><th>How it works</th><th>Strengths / weaknesses</th></tr></thead>
+<tbody>
+<tr><td>Linear Regression</td><td>defaults</td><td>Fits a straight-line (weighted sum) relationship</td><td>Fast, interpretable; misses curves and interactions</td></tr>
+<tr><td>Ridge Regression</td><td>alpha = 1.0</td><td>Linear regression with a penalty on large coefficients</td><td>More stable than plain linear when inputs are correlated</td></tr>
+<tr><td>K-Nearest Neighbors</td><td>k = 10, distance-weighted</td><td>Averages the health of the 10 most similar laptops</td><td>Simple, captures local patterns; weaker in many dimensions</td></tr>
+<tr><td>Decision Tree</td><td>min 5 rows per leaf</td><td>A single tree of if/else splits</td><td>Very interpretable; unstable and prone to overfitting</td></tr>
+<tr><td>Random Forest</td><td>150 trees, min 2 rows per leaf</td><td>Averages many trees built on random subsets</td><td>Robust, handles interactions; slower, less interpretable</td></tr>
+<tr><td>Extra Trees</td><td>150 trees, min 2 rows per leaf</td><td>Like Random Forest with more random splits</td><td>Often similar accuracy, faster</td></tr>
+<tr><td>Gradient Boosting</td><td>defaults (100 trees)</td><td>Trees built one after another, each correcting the last</td><td>Often very accurate; slower to train</td></tr>
+<tr><td>Hist Gradient Boosting</td><td>defaults</td><td>Fast histogram-based gradient boosting</td><td>Accurate and fast on larger data</td></tr>
+<tr><td>Support Vector Regression</td><td>C = 10, epsilon = 0.5</td><td>Fits a function that ignores errors within ±0.5 points</td><td>Good on smooth relationships; slow on very large data</td></tr>
+<tr><td>XGBoost (optional)</td><td>300 trees, learning rate 0.05, depth 5</td><td>Optimised gradient boosting</td><td>Strong accuracy; extra dependency</td></tr>
+<tr><td>LightGBM (optional)</td><td>300 trees, learning rate 0.05</td><td>Leaf-wise gradient boosting</td><td>Fast and accurate; extra dependency</td></tr>
+</tbody></table></div>
+<p>Hyper-parameters are fixed, sensible defaults rather than tuned per run. Tuning inside the app would multiply training time on free hosting, and with
+5-shuffle averaging the ranking is already robust. Tuning can be added later (section 12).</p>
+
+<h3 id="p-metrics"><span class="n">9.10</span>Metrics</h3>
+<p>All metrics are calculated on the test part of each shuffle, then averaged. <i>y</i> is the true health, <i>ŷ</i> the prediction, <i>n</i> the number of test rows.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Metric</th><th>Formula</th><th>Meaning</th><th>Good value</th></tr></thead>
+<tbody>
+<tr><td><b>R²</b> (coefficient of determination)</td><td>1 − Σ(y − ŷ)² ÷ Σ(y − ȳ)²</td><td>Share of the variation in health the model explains. 0 = no better than always predicting the average; 1 = perfect.</td><td>Closer to 1</td></tr>
+<tr><td><b>MAE</b> (mean absolute error)</td><td>Σ|y − ŷ| ÷ n</td><td>Average miss in health points. The easiest to explain to users.</td><td>Lower</td></tr>
+<tr><td><b>RMSE</b> (root mean squared error)</td><td>√(Σ(y − ŷ)² ÷ n)</td><td>Like MAE but punishes large misses more. RMSE much larger than MAE means occasional big errors.</td><td>Lower</td></tr>
+<tr><td><b>MAPE</b> (mean absolute percentage error)</td><td>Σ|(y − ŷ) ÷ y| ÷ n × 100</td><td>Average error relative to the true value.</td><td>Lower</td></tr>
+<tr><td><b>Train R²</b></td><td>R² on the training rows</td><td>How well the model fits data it has seen.</td><td>Close to test R²</td></tr>
+<tr><td><b>Overfit gap</b></td><td>Train R² − mean test R²</td><td>Memorisation. Above about 0.05 the model fits training data much better than new data.</td><td>Small</td></tr>
+</tbody></table></div>
+
+<h3 id="p-recommend"><span class="n">9.11</span>Choosing the recommended model</h3>
+<p>Models are ranked by a <b>stability score</b> that rewards being both accurate and consistent:</p>
+<div class="formula"><b>Stability score</b> = Mean R² − Spread (standard deviation of R² across the 5 shuffles)</div>
+<p>Example: a model with mean R² 0.930 ± 0.003 (score 0.927) ranks above one with 0.932 ± 0.010 (score 0.922); the second is marginally better on average
+but less predictable. The top model is marked ⭐ and pre-selected. The user may choose any other model with the option buttons on the Model performance page or the <b>Change model</b> dropdown
+in the sidebar; both stay in sync. The choice applies immediately to the Predict and Batch pages, and the header subtitle updates to name it.
+Changing the split or the Full Charge Capacity setting starts a new comparison, so the selection returns to that comparison's recommended model.</p>
+
+<h3 id="p-final"><span class="n">9.12</span>The final model</h3>
+<p><b>Function:</b> <code>fit_final</code>. After the comparison, the chosen model is trained once more on <b>all rows</b>. The shuffles exist only to
+measure performance; for real predictions it is better to learn from every available laptop. The reported scores therefore describe this model slightly
+conservatively, since it has seen 15–30% more data than during testing.</p>
+
+<h3 id="p-predict"><span class="n">9.13</span>Making a prediction: input rules and bands</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Check</th><th>Rule</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Not a number</td><td>Text that cannot be read as a number (commas are allowed)</td><td>Rejected with a message; no prediction</td></tr>
+<tr><td>Impossible value</td><td>Negative values; percentages above 100</td><td>Rejected with a message</td></tr>
+<tr><td>Outside data range</td><td>Below the minimum or above the maximum in the training data</td><td>Accepted with a warning: the model is extrapolating</td></tr>
+<tr><td>Gaming User</td><td>Yes/No choice</td><td>Stored as 1/0</td></tr>
+</tbody></table></div>
+<p>The prediction is clipped to 0–100 and assigned a band:</p>
+<div class="formula"><b>Good</b>: health ≥ 70% &nbsp;·&nbsp; <b>Moderate</b>: 40% ≤ health &lt; 70% &nbsp;·&nbsp; <b>Poor</b>: health &lt; 40%</div>
+
+<h3 id="p-error"><span class="n">9.14</span>Error ranges shown with a prediction</h3>
+<p>A regression model does not output a "confidence percentage". Instead, the app reports how wrong the model typically is, measured on test data:</p>
+<div class="formula">
+<b>Likely range</b> = prediction ± MAE of the active model (mean over the 5 shuffles)<br>
+<b>90% of predictions within ±q</b>: q = 90th percentile of |y − ŷ| over all test rows of all 5 shuffles combined
+</div>
+<p>Example: prediction 76.9%, MAE 1.8 → likely between 75.1% and 78.7%. If q = 3.8, then 9 out of 10 test laptops were predicted within 3.8 points.
+These are averages over the test data; for inputs outside the training range the real error can be larger.</p>
+
+<h3 id="p-insights"><span class="n">9.15</span>Insights: conclusion, what-if, step-by-step chart and comparisons</h3>
+<h4 id="ins-drivers">Effect of each input (the basis of all insights)</h4>
+<p>For each input the app asks: how different would the prediction be if this one input were typical?</p>
+<div class="formula"><b>Effect of input X</b> = prediction(actual inputs) − prediction(same inputs, with X set to its typical value)</div>
+<p>Typical value = the training median (for Gaming User: the most common value). Negative means X lowers health compared with a typical laptop.
+Calculated attributes are recomputed from the changed input. When Full Charge Capacity is included, it and Design Capacity are tested
+<b>together</b>, because changing one alone creates an impossible ratio.</p>
+
+<h4 id="ins-waterfall">From a typical laptop to yours (waterfall chart)</h4>
+<div class="formula"><b>Start</b> = prediction with every input typical &nbsp;→&nbsp; add the six largest effects &nbsp;→&nbsp;
+<b>Other inputs &amp; combined effects</b> = your prediction − start − shown effects &nbsp;→&nbsp; <b>Your laptop</b></div>
+<p>Because inputs interact, single effects do not add up exactly; the "combined" step makes the total exact rather than hiding the difference.</p>
+
+<h4 id="ins-whatif">What if</h4>
+<p>For each <b>everyday habit</b> that lowers the estimate by at least 0.5 points (<code>INSIGHT_MIN_EFFECT</code>), the app shows the prediction
+with that habit at its typical value:</p>
+<div class="formula"><b>What-if prediction</b> = your prediction − effect of that input (at most three are shown)</div>
+<p>Habits are the inputs in <code>CHANGEABLE</code>: Daily Usage Hours, Gaming User, CPU Usage, GPU Usage, Power Consumption and Average Temperature.
+Battery Age, Cycle Count and the capacities reflect history or hardware, so they are named but not offered as what-ifs.
+A what-if is the model's estimate, not a promise about a real battery.</p>
+
+<h4 id="ins-percentile">How your laptop compares</h4>
+<div class="formula"><b>Percentile</b> = (share of laptops with a lower value + ½ × share with an equal value) × 100</div>
+<p>Each input is described in words ("higher than 99% of laptops", or "close to typical" between the 35th and 65th percentile) with the typical
+value beside it, and grouped by its effect: <b>Concerns</b> (lowers the estimate by ≥ 0.5 points), <b>In your favour</b> (raises it by ≥ 0.5)
+and <b>Normal</b>. The five calculated attributes appear under <b>Usage profile</b> with their formulas.</p>
+
+<h4 id="ins-conclusion">Conclusion and advice rules</h4>
+<ol>
+<li>State the prediction and band.</li>
+<li>Name up to two inputs with effect ≤ −0.5 points as pulling health down, and the largest effect ≥ +0.5 as working in its favour.</li>
+<li>If no input reaches ±0.5 points, say that no single factor stands out.</li>
+<li>Mention a calculated attribute only if it is at or above the 80th percentile <b>and</b> one of its source inputs is among the top three negative drivers.</li>
+<li>Show advice for the (up to) two negative drivers from <code>ADVICE</code> in <code>config.py</code>.</li>
+</ol>
+<p>All insight wording describes associations in the data, not proven causes. The one-at-a-time method is transparent and works for every model;
+its limitation is that effects of correlated inputs (for example Cycle Count and Battery Age) are not fully separated.</p>
+
+<h3 id="p-batch"><span class="n">9.16</span>Batch prediction</h3>
+<p>Uploaded files go through the same column matching and numeric conversion as the training data, then the active model. Blank cells are filled with the
+training median by the model pipeline and flagged in a Notes column, as are out-of-range values. When the file contains Battery Health, the page reports
+MAE against those values.</p>
+
+<h3 id="p-importance"><span class="n">9.17</span>Feature importance</h3>
+<p><b>Function:</b> <code>importance_for</code>. Uses <b>permutation importance</b> on the test part of shuffle 1:</p>
+<div class="formula"><b>Importance of X</b> = R²(original test data) − R²(test data with column X randomly shuffled), averaged over 5 repeats</div>
+<p>Shuffling breaks the link between X and health; the bigger the drop in R², the more the model relies on X. This works for every model type.
+Correlated inputs share credit, so each may look less important than its combined effect. Feature importance is global (across all laptops), while the
+drivers in 9.15 are local (one laptop).</p>
+
+<h3 id="p-versions"><span class="n">9.18</span>Data versions</h3>
+<p><b>Module:</b> <code>versions.py</code>. Every data file is kept in <code>data/versions/</code> as
+<code>battery_health_v&lt;number&gt;_&lt;date&gt;.csv</code>, and <code>versions.json</code> records for each version its number, date,
+row count, note and how it arrived (initial file, uploaded in the app, or replaced outside the app). The active version is copied to
+<code>data/battery_health.csv</code>, which the models train on.</p>
+<ul>
+<li><b>Replace</b> saves the upload as the next version and activates it. <b>Restore</b> re-activates an earlier version. Nothing is ever deleted.</li>
+<li><b>Check before replace</b> (<code>engine.validate_upload</code>): missing required columns or fewer than 30 usable rows block the upload;
+fewer than 200 rows, non-numeric values, rows without Battery Health, duplicates and impossible values produce warnings.</li>
+<li><b>Storage</b>: on your computer, versions stay in the project folder. When deployed, set <code>GITHUB_TOKEN</code> and <code>GITHUB_REPO</code>
+in <code>.streamlit/secrets.toml</code>; every Replace or Restore is then also committed to the repository, so versions survive restarts
+and GitHub keeps the full history.</li>
+<li>There is no password on Replace; any bad upload can be undone with Restore.</li>
+</ul>
+
+<h3 id="p-mrgk"><span class="n">9.19</span>Mr. GK, the assistant</h3>
+<p><b>Module:</b> <code>mrgk.py</code>. Mr. GK answers questions about the project inside the app.</p>
+<ol>
+<li><b>Knowledge base</b> (<code>mrgk_kb.py</code>): about 30 topics — Full Charge Capacity, the recommended model, each metric, the split and
+shuffles, overfitting, the models, Ridge versus Linear, calculated attributes, preprocessing, bands, error ranges, insights, what-if,
+percentiles, feature importance, correlations, data versions, batch prediction, limitations, units, deployment and more — each answered in
+depth with <b>live numbers from the running app</b>. Asking about any attribute ("does temperature affect health?") gives an attribute profile:
+meaning, range, correlation, importance and its effect on your latest prediction. "Explain my prediction" gives the full step-by-step breakdown.</li>
+<li><b>Find</b>: the guide is split into its sections and attribute cards and matched against the question with keyword scoring
+(R2, R-squared and R² are treated as the same).</li>
+<li><b>Answer (AI mode)</b>: the question, the knowledge-base answer as reference, the best-matching sections and the live app state
+(data version, settings, all model scores, correlations and your latest prediction) are sent to the AI service, which is asked for a thorough,
+structured answer grounded only in that material, with section citations turned into 📖 buttons.</li>
+<li><b>Answer (Guide mode)</b>: with no AI key, after the daily limit, or if the service fails, Mr. GK gives the knowledge-base answer; for
+other questions, readable passages from the most relevant guide sections. Questions unrelated to the project get a polite "not covered".</li>
+</ol>
+<p><b>Settings</b> (<code>config.py</code>): model <code>MRGK_MODEL</code>, answer length <code>MRGK_MAX_TOKENS</code>, sections sent
+<code>MRGK_CONTEXT_SECTIONS</code>, and <code>MRGK_DAILY_CAP</code>, the number of AI answers per day across all users.
+The key goes in <code>.streamlit/secrets.toml</code> as <code>ANTHROPIC_API_KEY</code>; it stays on the server and is never part of the
+downloadable guide.</p>
+
+<h3 id="p-edastats"><span class="n">9.20</span>EDA statistics</h3>
+<p><b>Functions:</b> <code>univariate</code>, <code>outlier_table</code>, <code>vif_table</code>, <code>high_pairs</code>,
+<code>binned_target</code> in <code>engine.py</code>. Calculated on all rows of the active data version.</p>
+<div class="formula">
+<b>Skewness</b> = mean((x − mean)³) ÷ std³ &nbsp;·&nbsp; −0.5 to 0.5 symmetric, 0.5–1 moderate, above 1 high; positive = long tail of high values<br>
+<b>Kurtosis</b> (excess) = mean((x − mean)⁴) ÷ std⁴ − 3 &nbsp;·&nbsp; above 1 heavy tails, below −1 flat (pandas applies small-sample corrections)<br>
+<b>IQR outlier</b>: x &lt; Q1 − 1.5 × IQR or x &gt; Q3 + 1.5 × IQR, with IQR = Q3 − Q1 &nbsp;·&nbsp; <b>z-score outlier</b>: |x − mean| ÷ std &gt; 3<br>
+<b>VIF</b> = 1 ÷ (1 − R²), R² from predicting the input with the other model inputs (linear regression) &nbsp;·&nbsp; below 5 fine, 5–10 moderate, above 10 high<br>
+<b>Pearson r</b>: straight-line correlation &nbsp;·&nbsp; <b>Spearman ρ</b>: correlation of ranks, which also captures curved but consistent relationships
+</div>
+<p>"Average health across a variable's range" splits laptops into eight groups of similar size by that variable (each value for Yes/No) and plots
+the mean health per group. Yes/No variables have no meaningful skewness or kurtosis and are excluded from outlier rules.</p>
+
+<h3 id="p-bandacc"><span class="n">9.21</span>Band accuracy: precision and recall</h3>
+<p>Precision and recall are classification metrics; the model does regression. Because every prediction is also placed in a health band,
+the app turns actual and predicted health on the test sets of all 5 shuffles into bands and compares them
+(<code>engine.band_metrics</code>).</p>
+<div class="formula">
+<b>Precision</b> (band) = correctly predicted in the band ÷ all predicted in the band<br>
+<b>Recall</b> (band) = correctly predicted in the band ÷ all really in the band<br>
+<b>F1</b> = 2 × precision × recall ÷ (precision + recall) &nbsp;·&nbsp; <b>Band accuracy</b> = correct bands ÷ all predictions
+</div>
+<p>Mistakes happen mostly near the 70% and 40% boundaries, where an error of a couple of points crosses the line. A band with no test
+laptops is shown as "–" because it cannot be measured.</p>
+
+<h3 id="p-selectionvars"><span class="n">9.22</span>Variable selection: evidence for every variable</h3>
+<p><b>Function:</b> <code>variable_decisions</code>. For each variable the app records its role, whether the model uses it, and a
+justification built from the evidence:</p>
+<ul>
+<li><b>Full Charge Capacity</b>: excluded by default because its ratio to Design Capacity correlates almost perfectly with the target (leakage, 9.4).</li>
+<li><b>Calculated attributes</b>: used only if the selection test (9.5) shows a gain of at least 0.002 in cross-validated R²; otherwise
+insights only, with the measured gain shown.</li>
+<li><b>Inputs</b>: described as core (|r| ≥ 0.7), useful (0.3–0.7), weak (0.1–0.3, kept for information in combination) or near zero
+(kept as reference; flagged as a candidate for removal), with VIF, outlier share and the active model's importance.</li>
+</ul>
+</section>
+
+<!-- ============================================================ 10 -->
+<section id="decisions" data-title="Decision log">
+<h2><span class="n">10</span>Decision log</h2>
+<p>Every modelling decision in one place, with the reason and the calculation behind it.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Decision</th><th>Choice</th><th>Reason</th><th>Calculation / rule</th><th>Where</th></tr></thead>
+<tbody>
+<tr><td>Target</td><td>Battery Health (%)</td><td>The quantity users care about</td><td>Regression, clipped to 0–100</td><td>9.13</td></tr>
+<tr><td>Full Charge Capacity</td><td>Off by default, user can switch on</td><td>Target leakage: health ≈ its ratio to design capacity</td><td>Ratio ÷ health correlation shown on EDA page</td><td>9.4</td></tr>
+<tr><td>Battery Age type</td><td>Number, not category</td><td>Age is an ordered quantity</td><td><code>kind: "numeric"</code></td><td>9.3</td></tr>
+<tr><td>Gaming User type</td><td>Yes/No stored as 1/0</td><td>Two-valued attribute</td><td><code>kind: "binary"</code></td><td>6.2</td></tr>
+<tr><td>Rows without target</td><td>Removed</td><td>Nothing to learn from</td><td>—</td><td>9.2</td></tr>
+<tr><td>Duplicates</td><td>Removed</td><td>Prevent the same laptop in train and test</td><td>Exact row match</td><td>9.2</td></tr>
+<tr><td>Missing inputs</td><td>Median imputation</td><td>Robust to extreme values</td><td>Training median per column</td><td>9.6</td></tr>
+<tr><td>Outliers</td><td>Kept</td><td>Genuine extreme laptops are valid</td><td>Range warnings at prediction time</td><td>9.2, 9.13</td></tr>
+<tr><td>Scaling</td><td>Standard scaling</td><td>Distance- and penalty-based models need comparable scales</td><td>z = (x − mean) ÷ sd</td><td>9.6</td></tr>
+<tr><td>Calculated attributes</td><td>Keep only if helpful</td><td>Avoid complexity without benefit</td><td>CV R² gain ≥ 0.002 on training rows</td><td>9.5</td></tr>
+<tr><td>Capacity ratio</td><td>Never used as an attribute</td><td>It is the target in disguise</td><td>—</td><td>7</td></tr>
+<tr><td>Split options</td><td>70/30, 75/25, 80/20, 85/15</td><td>Limited, sensible choices</td><td>Default 80/20</td><td>9.7</td></tr>
+<tr><td>Random state</td><td>5 fixed internal shuffles, not user-editable</td><td>Stable scores; no cherry-picking</td><td>Seeds 11, 23, 42, 57, 89</td><td>9.8</td></tr>
+<tr><td>Model ranking</td><td>Stability score</td><td>Reward accuracy and consistency</td><td>Mean R² − spread</td><td>9.11</td></tr>
+<tr><td>Model choice</td><td>User may override the recommendation</td><td>Transparency and control</td><td>Option buttons</td><td>9.11</td></tr>
+<tr><td>Final model</td><td>Refit on all rows</td><td>Use all available data for predictions</td><td>—</td><td>9.12</td></tr>
+<tr><td>Uncertainty display</td><td>± MAE and 90% error band</td><td>Honest, no invented "confidence"</td><td>MAE; 90th percentile of |error|</td><td>9.14</td></tr>
+<tr><td>Health bands</td><td>Good ≥ 70, Moderate 40–70, Poor &lt; 40</td><td>Domain rule from the design</td><td><code>HEALTH_BANDS</code></td><td>9.13</td></tr>
+<tr><td>Driver method</td><td>One-at-a-time sensitivity to typical value</td><td>Transparent, model-agnostic</td><td>Effect = pred − pred(X typical)</td><td>9.15</td></tr>
+<tr><td>Capacity pair</td><td>Tested together</td><td>Separate changes create impossible ratios</td><td>Both set to median</td><td>9.15</td></tr>
+<tr><td>Insight threshold</td><td>0.5 points</td><td>Only mention factors that matter</td><td><code>INSIGHT_MIN_EFFECT</code></td><td>9.15</td></tr>
+<tr><td>Training data source</td><td>One active CSV, replaced through the Data page</td><td>Data changes rarely; replacing should be safe and reversible</td><td>Check report before Replace; change detection triggers retraining</td><td>3, 9.18</td></tr>
+<tr><td>Data versions</td><td>Every version kept; Restore any</td><td>Undo any upload; audit trail</td><td><code>versions.json</code>; GitHub commits when deployed</td><td>9.18</td></tr>
+<tr><td>Replace protection</td><td>No password</td><td>Simplicity; mistakes are reversible with Restore</td><td>—</td><td>9.18, 11</td></tr>
+<tr><td>Applying changes</td><td>Nothing changes until Apply</td><td>Avoid accidental retraining; clear confirmation</td><td>Confirmation message after Apply</td><td>5</td></tr>
+<tr><td>What-if suggestions</td><td>Everyday habits only</td><td>Age, cycles and capacities cannot be changed</td><td><code>CHANGEABLE</code>; what-if = prediction − effect</td><td>9.15</td></tr>
+<tr><td>Comparison groups</td><td>By effect on this prediction</td><td>Consistent with the waterfall chart</td><td>Concern ≤ −0.5, favour ≥ +0.5 points</td><td>9.15</td></tr>
+<tr><td>Prediction records</td><td>CSV and PDF downloads</td><td>Keep and share results with context</td><td>Includes model, split and data version</td><td>5</td></tr>
+<tr><td>Variable justification</td><td>EDA covers all 16 variables, with a decision per variable</td><td>Show why unused variables are left out</td><td>Correlation, VIF, outliers, importance, selection gain</td><td>9.22</td></tr>
+<tr><td>Band precision / recall</td><td>Measured on bands, not the raw number</td><td>Regression has no classes; bands do</td><td>Pooled over 5 test shuffles</td><td>9.21</td></tr>
+<tr><td>Outlier handling</td><td>Detect with IQR and z-score, keep</td><td>Genuine laptops; robust models; range warnings</td><td>Q1 − 1.5·IQR, Q3 + 1.5·IQR; |z| &gt; 3</td><td>9.20</td></tr>
+<tr><td>Assistant</td><td>Mr. GK, grounded in the guide and app state</td><td>Answer questions without inventing facts</td><td>Cites sections; daily cap; guide-mode fallback</td><td>9.19</td></tr>
+<tr><td>Hosting</td><td>One free host, within its terms</td><td>Workload is small; account rotation breaches terms</td><td>—</td><td>3</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================ 11 -->
+<section id="limitations" data-title="Limitations and considerations">
+<h2><span class="n">11</span>Limitations and considerations</h2>
+<h3 id="lim-data">About the data</h3>
+<ul>
+<li><b>Unknown source.</b> How, where and from which laptops the data was collected is not documented. Results describe this dataset and may not apply
+to other laptop populations, brands or climates.</li>
+<li><b>Stand-in data.</b> The bundled CSV is synthetic until replaced with the real file (section 3).</li>
+<li><b>Capacity units</b> are uncertain (mAh vs mWh); see the <a href="#unit-note" data-jump="unit-note">unit note</a>.</li>
+<li><b>Measurement definitions</b> (which temperature, which averaging period, whether usage hours are on battery) are unknown.</li>
+<li><b>Missing drivers.</b> Charging habits, climate and battery chemistry are not in the data; their effects are invisible to the model or partly absorbed by other inputs.</li>
+<li><b>Snapshot, not history.</b> Each row is one moment per laptop; the model cannot track how a single battery wears over time.</li>
+</ul>
+<h3 id="lim-model">About the model</h3>
+<ul>
+<li><b>Association, not causation.</b> Insights and advice describe patterns in the data. Reducing cycles is <i>associated</i> with higher health;
+the data cannot prove it will raise any particular battery's health.</li>
+<li><b>Extrapolation.</b> Inputs outside the training range produce less reliable predictions; the app warns but does not refuse.</li>
+<li><b>Correlated inputs.</b> Cycle Count and Battery Age (and CPU, GPU and power) move together, so their individual importances and effects are partly shared.</li>
+<li><b>Fixed hyper-parameters.</b> Models use sensible defaults, not per-dataset tuning; a tuned model could score slightly higher.</li>
+<li><b>Error ranges are averages.</b> "± MAE" describes typical test errors, not a guarantee for each laptop.</li>
+<li><b>With Full Charge Capacity included</b>, high scores reflect the capacity ratio rather than an understanding of wear.</li>
+</ul>
+<h3 id="lim-ops">About running the app</h3>
+<ul>
+<li><b>No password on Replace</b>: anyone who can open the app can replace the data. Version history makes every change reversible.</li>
+<li><b>Mr. GK can be wrong.</b> Answers are grounded in the guide, but AI output can still misread or oversimplify; check the cited section.
+In AI mode, questions are sent to the AI provider; do not type personal information.</li>
+<li><b>Training time</b>: about 20–40 seconds per combination of data, setting and split on a single CPU; results are cached while the app runs.</li>
+<li><b>Free hosting sleeps</b> after inactivity; the first visit afterwards retrains.</li>
+<li><b>Library versions</b>: the app trains in place, so there is no saved-model version mismatch. If you export a model elsewhere, use the same numpy and scikit-learn versions.</li>
+</ul>
+</section>
+
+<!-- ============================================================ 12 -->
+<section id="extending" data-title="Extending the project">
+<h2><span class="n">12</span>Extending the project</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Goal</th><th>What to change</th></tr></thead>
+<tbody>
+<tr><td>Change health band thresholds or messages</td><td><code>HEALTH_BANDS</code>, <code>BAND_MESSAGES</code> in <code>config.py</code></td></tr>
+<tr><td>Rename a column, change units or descriptions</td><td><code>FEATURES</code> in <code>config.py</code></td></tr>
+<tr><td>Add a new input column</td><td>Add it to the CSV and to <code>FEATURES</code> (and to <code>ADVICE</code> for advice). It is used automatically.</td></tr>
+<tr><td>Add a calculated attribute</td><td>Add it to <code>ENGINEERED</code> in <code>config.py</code> and its formula to <code>add_engineered</code> in <code>engine.py</code>.</td></tr>
+<tr><td>Change split options or shuffle count</td><td><code>SPLIT_OPTIONS</code>, <code>STABILITY_SEEDS</code></td></tr>
+<tr><td>Add or remove a model</td><td><code>make_models</code> in <code>engine.py</code></td></tr>
+<tr><td>Add hyper-parameter tuning</td><td>Tune the chosen model in <code>fit_final</code> (for example with <code>RandomizedSearchCV</code>); expect longer training.</td></tr>
+<tr><td>Change advice text</td><td><code>ADVICE</code> in <code>config.py</code></td></tr>
+<tr><td>Use a banner photo</td><td>Save it as <code>assets/hero.jpg</code></td></tr>
+<tr><td>Turn on Mr. GK's AI mode</td><td>Add <code>ANTHROPIC_API_KEY = "…"</code> to <code>.streamlit/secrets.toml</code></td></tr>
+<tr><td>Change Mr. GK's model or daily limit</td><td><code>MRGK_MODEL</code>, <code>MRGK_DAILY_CAP</code> in <code>config.py</code></td></tr>
+<tr><td>Store versions on GitHub</td><td>Add <code>GITHUB_TOKEN</code>, <code>GITHUB_REPO</code> (and optionally <code>GITHUB_BRANCH</code>) to secrets</td></tr>
+<tr><td>Change which habits get what-ifs</td><td><code>CHANGEABLE</code> in <code>config.py</code></td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================ 13 -->
+<section id="troubleshooting" data-title="Troubleshooting">
+<h2><span class="n">13</span>Troubleshooting</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead>
+<tbody>
+<tr><td>"The data file is missing required column(s)"</td><td>CSV headers don't match section 6</td><td>Rename the columns; capitals, spaces and punctuation are ignored when matching</td></tr>
+<tr><td>"Data file not found"</td><td>No file at <code>data/battery_health.csv</code></td><td>Place the CSV there with that exact name</td></tr>
+<tr><td><code>ImportError: cannot import name 'DEFAULT_EXCLUDED_CONTENT_TYPES'</code></td><td>Streamlit and an older <code>starlette</code> in the same environment</td><td><code>pip install -U starlette</code>, or use a fresh environment</td></tr>
+<tr><td><code>ModuleNotFoundError: No module named 'numpy._core'</code></td><td>Loading a model saved with numpy 2 in an environment with numpy 1</td><td>Install numpy 2 (<code>pip install "numpy>=2"</code>); this app retrains in place, so it avoids the issue</td></tr>
+<tr><td>Training takes long</td><td>Large data, slow host, or XGBoost/LightGBM installed</td><td>Normal on first run; results are cached. Remove optional models or reduce <code>STABILITY_SEEDS</code> if needed</td></tr>
+<tr><td>Toggle for Full Charge Capacity is greyed out</td><td>The column is not in the CSV</td><td>Add the column, or leave it off</td></tr>
+<tr><td>Model choice doesn't seem to change</td><td>Clicking the leaderboard table (not clickable), or the split / Full Charge Capacity setting was changed, which resets to the recommended model</td><td>Use the option buttons below the table or the <b>Change model</b> dropdown in the sidebar</td></tr>
+<tr><td><code>ModuleNotFoundError: No module named 'plotly'</code></td><td>Requirements not installed in the environment running the app</td><td><code>pip install -r requirements.txt</code>, then start with <code>python -m streamlit run app.py</code></td></tr>
+<tr><td>Mr. GK says "Guide mode"</td><td>No AI key, the daily limit was reached, or the AI service is unreachable</td><td>Add <code>ANTHROPIC_API_KEY</code> to secrets; the limit resets daily</td></tr>
+<tr><td>Replace button is greyed out</td><td>The check report found a blocking error (missing columns or too few rows)</td><td>Fix the file and upload it again</td></tr>
+<tr><td>"GitHub sync failed" after Replace</td><td>Token without write access, wrong repository name, or no network</td><td>Check the token's repository permissions; the local version was still saved</td></tr>
+<tr><td>Predictions look off for one laptop</td><td>Inputs outside the training range</td><td>Check the warnings under the result</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================ 14 -->
+<section id="glossary" data-title="Glossary">
+<h2><span class="n">14</span>Glossary</h2>
+<dl class="gloss">
+<dt id="g-cv">Cross-validation (CV)</dt><dd>Splitting the training data into k parts (here 5), training on k−1 and testing on the remaining one, rotating k times and averaging the scores.</dd>
+<dt id="g-leak">Data leakage / target leakage</dt><dd>When information the model should not have at prediction time (for example the test rows, or a disguised copy of the target) influences training, making scores unrealistically good.</dd>
+<dt id="g-extrap">Extrapolation</dt><dd>Predicting for inputs outside the range seen in training.</dd>
+<dt id="g-fe">Feature / attribute</dt><dd>An input column used by the model. This guide uses "attribute".</dd>
+<dt id="g-f1">F1 score</dt><dd>The balance of precision and recall: 2 × precision × recall ÷ (precision + recall) (section 9.21).</dd>
+<dt id="g-iqr">IQR (interquartile range)</dt><dd>Q3 − Q1, the spread of the middle half of the values; used for the outlier rule (section 9.20).</dd>
+<dt id="g-imp">Imputation</dt><dd>Filling missing values, here with the training median.</dd>
+<dt id="g-kurt">Kurtosis</dt><dd>How heavy a distribution's tails are compared with a normal distribution; above 1 means more extreme values (section 9.20).</dd>
+<dt id="g-median">Median</dt><dd>The middle value when sorted; half the laptops are below it.</dd>
+<dt id="g-overfit">Overfitting</dt><dd>A model that learns the training data too closely, including its noise, and performs worse on new data.</dd>
+<dt id="g-percentile">Percentile</dt><dd>The share of laptops with a lower value, as a percentage.</dd>
+<dt id="g-perm">Permutation importance</dt><dd>How much a model's score drops when one attribute's values are shuffled (section 9.17).</dd>
+<dt id="g-pipeline">Pipeline</dt><dd>A fixed sequence of steps (imputation, scaling, model) learned and applied together.</dd>
+<dt id="g-rs">Random state (seed)</dt><dd>A number that fixes a random process, making a shuffle reproducible.</dd>
+<dt id="g-precision">Precision</dt><dd>Of the laptops predicted in a band, the share really in that band (section 9.21).</dd>
+<dt id="g-r2">R² (R-squared)</dt><dd>The share of the variation in battery health that the model explains: 1 is perfect, 0 is no better than always predicting the average (section 9.10).</dd>
+<dt id="g-recall">Recall</dt><dd>Of the laptops really in a band, the share the model placed there (section 9.21).</dd>
+<dt id="g-regression">Regression</dt><dd>Predicting a number (here health %), as opposed to classification, which predicts a category.</dd>
+<dt id="g-sens">Sensitivity analysis</dt><dd>Changing one input and observing how the output changes (section 9.15).</dd>
+<dt id="g-skew">Skewness</dt><dd>How lopsided a distribution is; positive means a long tail of high values (section 9.20).</dd>
+<dt id="g-split">Train/test split</dt><dd>Dividing data into a part for learning and a hidden part for measuring accuracy.</dd>
+<dt id="g-vif">VIF (variance inflation factor)</dt><dd>How much an input overlaps with the other inputs: 1 ÷ (1 − R²); above 5 means notable overlap (section 9.20).</dd>
+<dt id="g-version">Version (data)</dt><dd>One saved copy of the data file, numbered in order; any version can be restored (section 9.18).</dd>
+<dt id="g-waterfall">Waterfall chart</dt><dd>A chart that starts from one value and adds positive and negative steps to reach a final value (section 9.15).</dd>
+<dt id="g-whatif">What-if</dt><dd>The model's estimate after changing one input, all else unchanged (section 9.15).</dd>
+<dt id="g-zscore">z-score</dt><dd>How many standard deviations a value is from the mean; |z| &gt; 3 is flagged as an outlier (section 9.20).</dd>
+</dl>
+</section>
+
+<!-- ============================================================ 15 -->
+<section id="az-index" data-title="A–Z index">
+<h2><span class="n">15</span>A–Z index</h2>
+<p>Every section, attribute and glossary term, alphabetically. Built automatically from the guide, so it always matches the content.</p>
+<div class="az" id="azList"></div>
+</section>
+
+<!-- ============================================================ 16 -->
+<section id="version" data-title="Version history">
+<h2><span class="n">16</span>Version history</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Version</th><th>Changes</th></tr></thead>
+<tbody>
+<tr><td>3.1</td><td>Top-right controls: theme and guide as icon circles, Mr. GK as a pill with his photo; Mr. GK floats over every page with a short welcome, an FAQ section and a circled close button; light-mode fixes for help icons, the sidebar expand control and the chat input.</td></tr>
+<tr><td>3.0</td><td>Renamed Battery Clinic AI; light/dark theme toggle; EDA in seven tabs covering all 16 variables (skewness, kurtosis, bivariate, multivariate with VIF, outliers, target, variable selection) and an EDA report download; band precision/recall on Model performance; Predict page with inputs on the left; active data version inside the model card.</td></tr>
+<tr><td>2.3</td><td>App opens on the Data page; correlation chart redesigned with values, strength bands and a reading panel; chart titles fixed; Mr. GK hides the app menu and keeps the guide's contents; in-depth knowledge-base answers with live numbers; compact suggestion chips.</td></tr>
+<tr><td>2.2</td><td>Mr. GK moved to a full-height panel at the right edge; the app menu stays available while he is open.</td></tr>
+<tr><td>2.1</td><td>Mr. GK opens with a Close button; answers without § marks and direct answers for factual questions; menu shown as buttons; PDF library optional.</td></tr>
+<tr><td>2.0</td><td>Data page with check report, Replace and version history; sidebar in process order with Model setup and Apply on
+Predict, Batch and Model performance; CSV and PDF prediction downloads; redesigned insights (waterfall chart, what-if, grouped comparisons);
+Mr. GK assistant; full-width guide; tables sized to show every row; header fix when the sidebar is collapsed.</td></tr>
+<tr><td>1.1</td><td>Model selection rebuilt for reliability across Streamlit versions; <b>Change model</b> dropdown added to the sidebar; troubleshooting entries for model selection and missing plotly.</td></tr>
+<tr><td>1.0</td><td>First release: in-app training with 5-shuffle stability, user-selectable split and model, optional Full Charge Capacity,
+calculated attributes with automatic selection, insights panel, batch prediction with template, searchable user guide.</td></tr>
+</tbody></table></div>
+<footer>Battery Clinic AI user guide. Figures in section 6.1 are live when opened from the app; all other numbers describe the method and settings in <code>config.py</code>.</footer>
+</section>
+</main>
+</div>
+
+<script>
+(function () {
+  const content = document.getElementById('content');
+  const toc = document.getElementById('toc');
+  const q = document.getElementById('q');
+  const results = document.getElementById('results');
+  const hitsBar = document.getElementById('hitsBar');
+  const hitCount = document.getElementById('hitCount');
+  const aside = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
+
+  function label(el) {
+    const n = el.querySelector('.n');
+    if (!n) return el.textContent.trim();
+    const rest = [...el.childNodes].filter(c => c !== n).map(c => c.textContent).join('').trim();
+    return n.textContent.trim() + '  ' + rest;
+  }
+  function jump(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+    if (window.innerWidth <= 900 || document.body.classList.contains('compact')) { aside.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false'); }
+  }
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[data-jump]');
+    if (a) { e.preventDefault(); jump(a.dataset.jump); }
+  });
+
+  // live data box: hide the note when live data was injected
+  if (document.querySelector('.live')) document.querySelectorAll('.live-note').forEach(n => n.style.display = 'none');
+
+  // ---------- table of contents (sections + h3 sub-headings with ids)
+  const tocLinks = [];
+  content.querySelectorAll('section[id]').forEach(sec => {
+    const num = sec.querySelector('h2 .n');
+    const a = document.createElement('a');
+    a.href = '#' + sec.id; a.dataset.jump = sec.id;
+    a.textContent = (num ? num.textContent + '. ' : '') + sec.dataset.title;
+    toc.appendChild(a); tocLinks.push([a, sec]);
+    sec.querySelectorAll(':scope > h3[id]').forEach(h => {
+      const s = document.createElement('a');
+      s.href = '#' + h.id; s.dataset.jump = h.id; s.className = 'sub';
+      s.textContent = label(h);
+      toc.appendChild(s);
+    });
+  });
+
+  // ---------- scrollspy
+  const spy = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (en.isIntersecting) {
+        tocLinks.forEach(([a, s]) => a.classList.toggle('active', s === en.target));
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+  tocLinks.forEach(([, s]) => spy.observe(s));
+
+  // ---------- A–Z index (sections, sub-headings, attribute cards, glossary)
+  const entries = [];
+  content.querySelectorAll('section[id]').forEach(s => { if (s.id !== 'az-index') entries.push([s.dataset.title, s.id]); });
+  content.querySelectorAll('h3[id]').forEach(h => entries.push([h.textContent.replace(/^\s*[\d.]+\s*/, '').trim(), h.id]));
+  content.querySelectorAll('.attr[id]').forEach(d => entries.push([d.querySelector('h3').textContent.trim(), d.id]));
+  content.querySelectorAll('.gloss dt[id]').forEach(d => entries.push([d.textContent.trim(), d.id]));
+  content.querySelectorAll('h4[id]').forEach(h => entries.push([h.textContent.trim(), h.id]));
+  const seen = new Set();
+  const uniq = entries.filter(([t, id]) => { const k = t.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; })
+                      .sort((a, b) => a[0].localeCompare(b[0], undefined, { sensitivity: 'base' }));
+  const az = document.getElementById('azList');
+  let letter = '';
+  uniq.forEach(([t, id]) => {
+    const L = t[0].toUpperCase();
+    if (L !== letter) { letter = L; const d = document.createElement('div'); d.className = 'letter'; d.textContent = L; az.appendChild(d); }
+    const a = document.createElement('a'); a.href = '#' + id; a.dataset.jump = id; a.textContent = t; az.appendChild(a);
+  });
+
+  // ---------- search
+  let marks = [], current = -1, timer = null;
+  function clearMarks() {
+    marks.forEach(m => { const p = m.parentNode; if (!p) return; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize(); });
+    marks = []; current = -1;
+  }
+  function sectionOf(node) {
+    let el = node.parentElement;
+    let h3 = null;
+    while (el && el !== content) {
+      if (!h3) { let prev = el; while (prev && !(prev.matches && prev.matches('h3, h2'))) prev = prev.previousElementSibling; if (prev) h3 = prev; }
+      if (el.tagName === 'SECTION') return { sec: el, head: h3 && el.contains(h3) ? h3 : el.querySelector('h2') };
+      el = el.parentElement;
+    }
+    return { sec: null, head: null };
+  }
+  function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  function search(term) {
+    clearMarks(); results.innerHTML = '';
+    term = term.trim();
+    if (term.length < 2) { hitsBar.classList.remove('on'); toc.querySelectorAll('a').forEach(a => a.classList.remove('hidden')); return; }
+    const re = new RegExp(escapeRe(term), 'gi');
+    const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => (n.nodeValue.trim() && !n.parentElement.closest('script,style,#azList')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
+    });
+    const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+    const grouped = new Map();
+    nodes.forEach(node => {
+      const text = node.nodeValue; re.lastIndex = 0;
+      if (!re.test(text)) return;
+      re.lastIndex = 0;
+      const frag = document.createDocumentFragment(); let last = 0, m;
+      while ((m = re.exec(text))) {
+        frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+        const mk = document.createElement('mark'); mk.className = 'hit'; mk.textContent = m[0];
+        frag.appendChild(mk); marks.push(mk);
+        const info = sectionOf(node);
+        const key = info.head ? (info.head.id || info.head.textContent) : 'other';
+        if (!grouped.has(key)) grouped.set(key, { head: info.head, sec: info.sec, first: mk, count: 0,
+          snippet: text.slice(Math.max(0, m.index - 40), m.index + m[0].length + 50) });
+        grouped.get(key).count++;
+        last = m.index + m[0].length;
+      }
+      frag.appendChild(document.createTextNode(text.slice(last)));
+      node.parentNode.replaceChild(frag, node);
+    });
+    hitsBar.classList.add('on');
+    hitCount.textContent = marks.length ? `${marks.length} match${marks.length === 1 ? '' : 'es'} in ${grouped.size} place${grouped.size === 1 ? '' : 's'}` : 'No matches';
+    if (!marks.length) { results.innerHTML = '<div class="empty">Try a shorter or different word, for example "cycle" or "R²".</div>'; }
+    let i = 0;
+    grouped.forEach(g => {
+      if (i++ > 40) return;
+      const a = document.createElement('a'); a.href = '#';
+      const title = g.head ? label(g.head) : 'Section';
+      const small = document.createElement('small');
+      small.textContent = '…' + g.snippet.replace(/\s+/g, ' ').trim() + '…  (' + g.count + ')';
+      a.textContent = title; a.appendChild(small);
+      a.addEventListener('click', e => { e.preventDefault(); focusMark(marks.indexOf(g.first)); });
+      results.appendChild(a);
+    });
+    const secsWithHits = new Set([...grouped.values()].map(g => g.sec).filter(Boolean));
+    toc.querySelectorAll('a').forEach(a => {
+      const target = document.getElementById(a.dataset.jump);
+      const sec = target && (target.tagName === 'SECTION' ? target : target.closest('section'));
+      a.classList.toggle('hidden', !secsWithHits.has(sec));
+    });
+    if (marks.length) focusMark(0, false);
+  }
+  function focusMark(i, scroll = true) {
+    if (!marks.length) return;
+    if (current >= 0 && marks[current]) marks[current].classList.remove('current');
+    current = (i + marks.length) % marks.length;
+    marks[current].classList.add('current');
+    hitCount.textContent = `${current + 1} of ${marks.length}`;
+    if (scroll) marks[current].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  q.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => search(q.value), 180); });
+  q.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); focusMark(current + (e.shiftKey ? -1 : 1)); }
+    if (e.key === 'Escape') { q.value = ''; search(''); }
+  });
+  document.getElementById('nextHit').onclick = () => focusMark(current + 1);
+  document.getElementById('prevHit').onclick = () => focusMark(current - 1);
+  document.getElementById('clearHit').onclick = () => { q.value = ''; search(''); q.focus(); };
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); q.focus(); q.select(); }
+  });
+  menuBtn.addEventListener('click', () => {
+    const open = aside.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(open));
+  });
+})();
+</script>
+</body>
+</html>

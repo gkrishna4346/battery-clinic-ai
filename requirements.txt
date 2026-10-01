@@ -1,0 +1,10 @@
+streamlit>=1.40
+pandas>=2.0
+numpy>=1.26
+scikit-learn>=1.4
+plotly>=5.18
+fpdf2>=2.7
+requests>=2.28
+# Optional: adds XGBoost and LightGBM to the model comparison (longer training)
+# xgboost>=2.0
+# lightgbm>=4.0

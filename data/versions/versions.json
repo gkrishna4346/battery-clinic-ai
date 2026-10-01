@@ -1,0 +1,21 @@
+{
+  "active": 1,
+  "versions": [
+    {
+      "version": 1,
+      "file": "battery_health_v1_2026-10-01.csv",
+      "created": "2026-10-01 12:01",
+      "rows": 3000,
+      "note": "Initial dataset",
+      "source": "original",
+      "md5": "1af482b2c0a6b2c2e39be051fe42d9fa"
+    }
+  ],
+  "history": [
+    {
+      "time": "2026-10-01 12:01",
+      "action": "created",
+      "version": 1
+    }
+  ]
+}
