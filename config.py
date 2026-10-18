@@ -11,6 +11,8 @@ APP_TITLE = "Battery Clinic AI"
 APP_SUBTITLE = "Laptop battery health checkup"
 DATA_FILE = "data/battery_health.csv"
 GUIDE_FILE = "docs/user_guide.html"
+VIZ_FILE = "docs/visualization.html"        # the project visualized (opened from the floating battery logo)
+APP_URL = "https://battery-clinic-ai.streamlit.app"   # public address of the deployed app
 HERO_IMAGE = "assets/hero.jpg"          # optional; a built-in illustration is used if missing
 
 TARGET = "Battery Health"

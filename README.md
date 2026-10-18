@@ -44,3 +44,8 @@ and paste your secrets into the app's Settings → Secrets.
 | `data/battery_health.csv` | Active training data (`data/versions/` holds all versions) |
 
 See the user guide for every attribute, pipeline stage and decision.
+
+## Project visualization
+
+The glowing battery at the bottom of the sidebar opens `docs/visualization.html` in a new tab
+(the address is the app with `?view=visualized`). Its **Back to Battery Clinic AI** button returns to the app.

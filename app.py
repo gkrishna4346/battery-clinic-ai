@@ -28,6 +28,48 @@ P = lambda rel: os.path.join(HERE, rel)  # noqa: E731
 st.set_page_config(page_title=C.APP_TITLE, page_icon="🔋", layout="wide", initial_sidebar_state="expanded")
 
 
+# ============================================================ project visualization (?view=visualized)
+# Opened in a new tab from the floating battery logo. Handled before anything heavy runs, so it opens instantly.
+def _query(name):
+    try:
+        return st.query_params.get(name)
+    except Exception:
+        return None
+
+
+def _back_to_app():
+    st.query_params.clear()   # the rerun that follows shows the normal app in this tab
+
+
+if _query("view") == "visualized":
+    st.markdown("""<style>
+    header[data-testid="stHeader"], section[data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"],
+    [data-testid="collapsedControl"], footer { display: none !important; }
+    .block-container, [data-testid="stMainBlockContainer"] { padding: .55rem .8rem 0 !important; max-width: none !important; }
+    [data-testid="stMain"] iframe { height: calc(100vh - 3.6rem) !important; border: 0; }
+    [data-testid="stVerticalBlock"] { gap: .4rem !important; }
+    .st-key-viz_back button { border-radius: 999px !important; border: 1px solid #29c5f6 !important;
+      background: #0f3149 !important; min-height: 2.1rem !important; padding: 0 1rem !important; }
+    .st-key-viz_back button p { color: #62d4f8 !important; font-weight: 700 !important; }
+    .st-key-viz_back button:hover { background: #29c5f6 !important; }
+    .st-key-viz_back button:hover p { color: #071225 !important; }
+    </style>""", unsafe_allow_html=True)
+    b1, b2 = st.columns([1.2, 5], vertical_alignment="center")
+    b1.button("← Back to Battery Clinic AI", key="viz_back", on_click=_back_to_app)
+    b2.caption("The whole project visualized: 7 stages, 17 views. Built on the bundled sample dataset.")
+    _viz_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), C.VIZ_FILE)
+    if os.path.exists(_viz_path):
+        _viz = open(_viz_path, encoding="utf-8").read()
+        _viz = _viz.replace('<a class="back-app"', '<a hidden class="back-app"', 1)   # the button above replaces it
+        if hasattr(st, "iframe"):
+            st.iframe(_viz, height=900)
+        else:
+            components.html(_viz, height=900, scrolling=True)
+    else:
+        st.warning(f"{C.VIZ_FILE} is missing from the project folder.")
+    st.stop()
+
+
 def _secrets():
     try:
         return dict(st.secrets)
@@ -496,6 +538,60 @@ with st.container(key="topbar"):
     tb[1].button("", key="guide_btn", icon=":material/menu_book:", on_click=open_guide, help="Open the user guide")
     tb[2].button(C.MRGK_NAME, key="gk_btn", on_click=toggle_gk,
                  help=f"Close {C.MRGK_NAME}" if ss.get("gk_open") else f"Ask {C.MRGK_NAME}, the assistant")
+
+
+def _viz_link():
+    """Same server locally; the public address when deployed (the cloud runs the app inside a wrapper page)."""
+    try:
+        host = (st.context.headers.get("host") or "").lower()
+    except Exception:
+        host = ""
+    local = host.startswith(("localhost", "127.0.0.1", "0.0.0.0", "[::1]")) or not host
+    return ("./" if local else C.APP_URL.rstrip("/") + "/") + "?view=visualized"
+
+
+if os.path.exists(P(C.VIZ_FILE)):
+    with st.sidebar, st.container(key="bcfoot"):
+        st.markdown(f"""<style>
+/* sidebar footer: pushed to the bottom of the sidebar, stays visible when the sidebar scrolls */
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {{ display: flex; flex-direction: column; }}
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {{ flex: 1 0 auto; display: flex; flex-direction: column;
+  padding-bottom: 0 !important; }}
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > div {{ flex: 1 0 auto; display: flex; flex-direction: column; }}
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] {{ flex: 1 0 auto; }}
+[data-testid="stLayoutWrapper"]:has(> .st-key-bcfoot) {{ margin-top: auto; position: sticky; bottom: 0; z-index: 5; }}
+.st-key-bcfoot {{ margin-top: auto; position: sticky; bottom: 0; z-index: 5; background: {T("#061022")};
+  border-top: 1px solid {T("#1f3a66")}; padding: .85rem 0 1rem; }}
+.bc-float {{ display: flex; align-items: center; gap: .85rem; text-decoration: none !important; }}
+.bc-float .bc-lab {{ line-height: 1.25; }}
+.bc-float .bc-lab b {{ display: block; color: {T("#e6eefc")}; font-size: .9rem; }}
+.bc-float .bc-lab span {{ color: {T("#93a8cb")}; font-size: .74rem; }}
+.bc-float:hover .bc-lab b {{ color: {T("#29c5f6")}; }}
+.bc-logo {{ --w: 70px; flex: none; --glow: #2fa8ff; display: inline-flex; align-items: center; text-decoration: none !important;
+  cursor: pointer; filter: drop-shadow(0 0 4px var(--glow)) drop-shadow(0 0 10px rgba(47,168,255,.55)); }}
+.bc-logo .bc-body {{ width: var(--w); height: calc(var(--w) * .5); border: calc(var(--w) * .05) solid #eaf6ff;
+  border-radius: calc(var(--w) * .1); padding: calc(var(--w) * .035); display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: calc(var(--w) * .03); background: #0a1a33; transition: transform .15s; animation: bcfull 5s infinite;
+  box-shadow: 0 0 0 calc(var(--w) * .018) var(--glow), inset 0 0 0 calc(var(--w) * .018) var(--glow); }}
+.bc-logo .bc-tip {{ width: calc(var(--w) * .08); height: calc(var(--w) * .22); border: calc(var(--w) * .035) solid #eaf6ff;
+  border-left: 0; border-radius: 0 calc(var(--w) * .04) calc(var(--w) * .04) 0; box-shadow: 0 0 0 calc(var(--w) * .014) var(--glow); }}
+.bc-logo .bc-cell {{ border-radius: calc(var(--w) * .03); background: #fff; opacity: 0; box-shadow: 0 0 6px var(--glow);
+  animation: 5s infinite; }}
+.bc-logo .bc-c1 {{ animation-name: bc1; }} .bc-logo .bc-c2 {{ animation-name: bc2; }}
+.bc-logo .bc-c3 {{ animation-name: bc3; }} .bc-logo .bc-c4 {{ animation-name: bc4; }}
+@keyframes bc1 {{ 0%, 8% {{ opacity: 0; }} 12%, 92% {{ opacity: 1; }} 96%, 100% {{ opacity: 0; }} }}
+@keyframes bc2 {{ 0%, 24% {{ opacity: 0; }} 28%, 92% {{ opacity: 1; }} 96%, 100% {{ opacity: 0; }} }}
+@keyframes bc3 {{ 0%, 40% {{ opacity: 0; }} 44%, 92% {{ opacity: 1; }} 96%, 100% {{ opacity: 0; }} }}
+@keyframes bc4 {{ 0%, 56% {{ opacity: 0; }} 60%, 92% {{ opacity: 1; }} 96%, 100% {{ opacity: 0; }} }}
+@keyframes bcfull {{ 0%, 60%, 92%, 100% {{ filter: none; }} 68%, 84% {{ filter: brightness(1.25); }} 76% {{ filter: brightness(1.6); }} }}
+.bc-float:hover .bc-logo {{ --glow: #7cd3ff; }}
+.bc-float:hover .bc-body {{ transform: scale(1.06); }}
+@media (prefers-reduced-motion: reduce) {{ .bc-logo .bc-cell {{ animation: none; opacity: 1; }} .bc-logo .bc-body {{ animation: none; }} }}
+</style>
+<a class="bc-float" href="{_viz_link()}" target="_blank" rel="noopener"
+ aria-label="Open the project visualization in a new tab"><span class="bc-logo"><span class="bc-body"><span class="bc-cell bc-c1"></span><span
+ class="bc-cell bc-c2"></span><span class="bc-cell bc-c3"></span><span class="bc-cell bc-c4"></span></span><span
+ class="bc-tip"></span></span><span class="bc-lab"><b>Project visualized ↗</b><span>7 stages · 17 views · new tab</span></span></a>""", unsafe_allow_html=True)
 st.write("")
 if ss.get("flash"):
     st.success("✓ " + ss.flash)
